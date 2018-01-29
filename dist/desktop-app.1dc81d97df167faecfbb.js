@@ -1,0 +1,2 @@
+webpackJsonp([3],{"./src/desktop/app.tsx":function(e,t,s){"use strict";Object.defineProperty(t,"__esModule",{value:!0});const d=s("./node_modules/react/index.js");s("./node_modules/react-dom/index.js").render(d.createElement("div",{className:"swift"},"test desktop..."),document.getElementById("swift"))}},["./src/desktop/app.tsx"]);
+//# sourceMappingURL=desktop-app.1dc81d97df167faecfbb.js.map
