@@ -1,6 +1,6 @@
 import * as _debug from 'debug-logger';
-import compilerConfig from './webpack.config';
 import * as webpack from 'webpack';
+import compilerConfig from './webpack.config';
 
 const compiler = webpack(compilerConfig);
 

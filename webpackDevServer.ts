@@ -1,7 +1,7 @@
-import * as webpack from 'webpack';
-import compilerConfig from './webpack.config';
 import * as _debug from 'debug-logger';
+import * as webpack from 'webpack';
 import * as WebpackDevServer from 'webpack-dev-server';
+import compilerConfig from './webpack.config';
 
 const debug = _debug('swift');
 const compiler = webpack(compilerConfig);

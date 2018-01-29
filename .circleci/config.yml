@@ -50,7 +50,9 @@ workflows:
       - install:
           filters:
             branches:
-              only: /pull\/\d+/
+              ignore:
+                - master
+                - develop
       - test:
           requires:
             - install
@@ -60,7 +62,8 @@ workflows:
       - install:
           filters:
             branches:
-              only: /master/
+              only:
+                - master
       - test:
           requires:
             - install
