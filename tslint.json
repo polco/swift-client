@@ -38,6 +38,9 @@
             true,
             "allow-null-check"
         ],
+        "trailing-comma": false,
+        "only-arrow-functions": false,
+        "object-literal-sort-keys": false,
         "typedef-whitespace": [
             true,
             {

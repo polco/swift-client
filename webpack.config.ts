@@ -1,9 +1,9 @@
-import * as webpack from 'webpack';
 import * as debug from 'debug-logger';
 import * as ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
-import * as UglifyJsPlugin from 'uglifyjs-webpack-plugin';
-import * as path from 'path';
 import * as HtmlWebpackPlugin from 'html-webpack-plugin';
+import * as path from 'path';
+import * as UglifyJsPlugin from 'uglifyjs-webpack-plugin';
+import * as webpack from 'webpack';
 
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 const isDev = env === 'development';
@@ -12,39 +12,39 @@ const log = debug('swift');
 log('create webpack configuration');
 
 function isExternal(module: any) {
-	return module.context && module.context.includes("node_modules");
+	return module.context && module.context.includes('node_modules');
 }
 
 const plugins: webpack.Plugin[] = [
 	new ForkTsCheckerWebpackPlugin({ checkSyntacticErrors: true  }),
 	new webpack.NamedModulesPlugin(),
 	new webpack.optimize.CommonsChunkPlugin({
-		name: 'desktop-vendor',
 		chunks: ['desktop-app'],
-		minChunks: isExternal
+		minChunks: isExternal,
+		name: 'desktop-vendor'
 	}),
 	new webpack.optimize.CommonsChunkPlugin({
-		name: 'desktop-bootstrap',
 		chunks: ['desktop-app', 'desktop-vendor'],
-		minChunks: Infinity
+		minChunks: Infinity,
+		name: 'desktop-bootstrap'
 	}),
 	new webpack.optimize.CommonsChunkPlugin({
-		name: 'mobile-vendor',
 		chunks: ['mobile-app'],
-		minChunks: isExternal
+		minChunks: isExternal,
+		name: 'mobile-vendor'
 	}),
 	new webpack.optimize.CommonsChunkPlugin({
-		name: 'mobile-bootstrap',
 		chunks: ['mobile-app', 'mobile-vendor'],
-		minChunks: Infinity
+		minChunks: Infinity,
+		name: 'mobile-bootstrap'
 	}),
 	new HtmlWebpackPlugin({
-		template: path.join('src', 'index.html'),
-		inject: false,
 		chunks: ['desktop-bootstrap', 'desktop-vendor', 'desktop-app', 'mobile-bootstrap', 'mobile-vendor', 'mobile-app'],
+		inject: false,
 		minify: {
 			collapseWhitespace: !isDev
-		}
+		},
+		template: path.join('src', 'index.html')
 	})
 ];
 
@@ -58,9 +58,8 @@ if (!isDev) {
 		})
 	);
 } else {
-	new webpack.HotModuleReplacementPlugin();
+	plugins.push(new webpack.HotModuleReplacementPlugin());
 }
-
 
 const webpackConfig: webpack.Configuration = {
 	target: 'web',
