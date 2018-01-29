@@ -41,10 +41,11 @@ jobs:
           command: 'yarn run compile'
       - run:
           name: 'Deploy to gh-pages branch'
-          command: './scripts/deploy-ghpages.sh'
+          command: './scripts/deploy-ghpages.sh $CIRCLE_SHA1'
 
 workflows:
   version: 2
+
   test-pr:
     jobs:
       - install:
