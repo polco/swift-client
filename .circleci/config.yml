@@ -1,8 +1,10 @@
 version: 2
 jobs:
-  build:
+  install:
     docker:
       - image: circleci/node:carbon
+    environment:
+      NODE_ENV: not-production
     steps:
       - checkout
       - run:
@@ -12,3 +14,56 @@ jobs:
           name: 'Cache node_modules'
           key: node_modules-{{ checksum "yarn.lock" }}
           paths: node_modules
+  test:
+    docker:
+      - image: circleci/node:carbon
+    steps:
+      - checkout
+      - restore_cache:
+          name: 'Restore node_modules cache'
+          key: node_modules-{{ checksum "yarn.lock" }}
+      - run:
+          name: 'Run test'
+          command: 'yarn run test'
+
+  compile-and-deploy:
+    docker:
+      - image: circleci/node:carbon
+    environment:
+      NODE_ENV: production
+    steps:
+      - checkout
+      - restore_cache:
+          name: 'Restore node_modules cache'
+          key: node_modules-{{ checksum "yarn.lock" }}
+      - run:
+          name: 'Compile'
+          command: 'yarn run compile'
+      - run:
+          name: 'Deploy to gh-pages branch'
+          command: './scripts/deploy-ghpages.sh'
+
+workflows:
+  version: 2
+  test-pr:
+    jobs:
+      - install:
+          filters:
+            branches:
+              only: /pull\/\d+/
+      - test:
+          requires:
+            - install
+
+  deploy:
+    jobs:
+      - install:
+          filters:
+            branches:
+              only: /master/
+      - test:
+          requires:
+            - install
+      - compile-and-deploy:
+          requires:
+            - test
