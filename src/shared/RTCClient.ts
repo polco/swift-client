@@ -109,7 +109,7 @@ class RTCClient extends EventEmitter {
 		};
 
 		this.sendChannel.onmessage = (event) => {
-			console.log(JSON.parse(event.data));
+			console.log(JSON.parse(event.data)); // tslint:disable-line
 		};
 	}
 

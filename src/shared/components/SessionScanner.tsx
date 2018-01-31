@@ -1,5 +1,7 @@
+import * as debug from 'debug-logger';
 import * as Instascan from 'instascan';
 import * as React from 'react';
+const log = debug('swift:SessionScanner');
 
 export type Props = {
 	onSessionScanned: (sessionId: string) => void
@@ -34,20 +36,13 @@ class SessionDisplay extends React.PureComponent<Props, State> {
 				if (cameras.length > 0) {
 					this.scanner.start(cameras[1] || cameras[0]);
 				} else {
-					console.error('No cameras found.');
+					this.setState({ isScanning: false });
+					log('No cameras found.');
 				}
 			}).catch((e: any) => {
 				this.setState({ isScanning: false });
-				console.error(e);
+				log(e);
 			});
-			// QRScanner.initiate({
-			// 	onResult: (res: string) => {
-			// 		this.setState({ isScanning: false }, () => this.props.onSessionScanned(res));
-			// 	},
-			// 	onError: () => this.setState({ isScanning: false }),
-			// 	onTimeout: () => this.setState({ isScanning: false }),
-			// 	parent: this.scannerDiv
-			// });
 		});
 	}
 
