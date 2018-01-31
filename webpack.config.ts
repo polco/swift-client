@@ -79,6 +79,9 @@ const webpackConfig: webpack.Configuration = {
 		modules: ['src', 'node_modules'],
 		extensions: ['.js', '.jsx', '.ts', '.tsx']
 	},
+	node: {
+		fs: 'empty'
+	},
 	module: {
 		rules: [
 			{
