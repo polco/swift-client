@@ -1,4 +1,4 @@
-import * as QRScanner from 'qr-code-scanner';
+import * as Instascan from 'instascan';
 import * as React from 'react';
 
 export type Props = {
@@ -10,32 +10,52 @@ type State = {
 };
 
 class SessionDisplay extends React.PureComponent<Props, State> {
-	private scannerDiv: HTMLDivElement | null;
+	private videoElt: HTMLVideoElement | null;
+	private scanner: any;
 
-	constructor(props: Props, context: any) {
+	constructor (props: Props, context: any) {
 		super(props, context);
 
 		this.state = { isScanning: false };
 	}
 
+	public componentDidMount () {
+		this.scanner = new Instascan.Scanner({ video: this.videoElt, mirror: false });
+		this.scanner.addListener('scan', (content: string) => {
+			this.scanner.stop();
+			this.setState({ isScanning: false }, () => this.props.onSessionScanned(content));
+		});
+	}
+
 	private scan = () => {
 		this.setState({ isScanning: true }, () => {
-			QRScanner.initiate({
-				onResult: (res: string) => {
-					this.setState({ isScanning: false }, () => this.props.onSessionScanned(res));
-				},
-				onError: () => this.setState({ isScanning: false }),
-				onTimeout: () => this.setState({ isScanning: false }),
-				parent: this.scannerDiv
+
+			Instascan.Camera.getCameras().then((cameras: any[]) => {
+				if (cameras.length > 0) {
+					this.scanner.start(cameras[1] || cameras[0]);
+				} else {
+					console.error('No cameras found.');
+				}
+			}).catch((e: any) => {
+				this.setState({ isScanning: false });
+				console.error(e);
 			});
+			// QRScanner.initiate({
+			// 	onResult: (res: string) => {
+			// 		this.setState({ isScanning: false }, () => this.props.onSessionScanned(res));
+			// 	},
+			// 	onError: () => this.setState({ isScanning: false }),
+			// 	onTimeout: () => this.setState({ isScanning: false }),
+			// 	parent: this.scannerDiv
+			// });
 		});
 	}
 
 	private stopScanning = () => {
-		//
+		this.scanner.stop();
 	}
 
-	public render() {
+	public render () {
 		const { isScanning } = this.state;
 
 		return (
@@ -44,7 +64,7 @@ class SessionDisplay extends React.PureComponent<Props, State> {
 					? <button onClick={ this.stopScanning }>Stop scanning</button>
 					: <button onClick={ this.scan }>scan QR code</button>
 				}
-				<div className='session-scanner__scanner-placeholder' ref={ ref => this.scannerDiv = ref } />
+				<video ref={ ref => this.videoElt = ref } />
 			</div>
 		);
 	}

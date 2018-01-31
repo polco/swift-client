@@ -17,7 +17,7 @@ function isExternal(module: any) {
 }
 
 const serverEndPoint = isDev
-	? `http://${ip.address()}:${process.env.PORT || 3434}`
+	? `https://${ip.address()}:${process.env.PORT || 3434}`
 	: 'https://swift-gateway.herokuapp.com';
 
 log(`Socket server end point will be ${serverEndPoint}`);

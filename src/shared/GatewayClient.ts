@@ -10,7 +10,10 @@ class GatewayClient<T> extends EventEmitter {
 		super();
 		this.socket = SocketIO(__SOCKET_END_POINT__, { transports: ['websocket'], autoConnect: false });
 
-		this.socket.on('data', (data: T) => this.emit('message', data));
+		this.socket.on('data', ({ fromId, data }: { data: T, fromId: string }) => {
+			log('received data', data);
+			this.emit('message', fromId, data);
+		});
 		this.socket.on('error', (error: any) => log(error));
 		this.socket.on('disconnect', () => {
 			log(`${this.localId}: Disconnected from the gateway`);
@@ -47,6 +50,7 @@ class GatewayClient<T> extends EventEmitter {
 	}
 
 	public send(remoteId: string, data: T) {
+		log('sending to', data, 'to', remoteId);
 		this.socket.emit('data', {
 			remoteId,
 			data

@@ -12,6 +12,7 @@ const server = new WebpackDevServer(compiler, {
 		// poll: true,
 		aggregateTimeout: 300
 	},
+	https: true,
 	hot: false,
 	lazy: false,
 	historyApiFallback: true,

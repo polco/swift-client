@@ -16,7 +16,7 @@ class Home extends React.PureComponent<Props, State> {
 		this.client = new RTCClient();
 	}
 
-	private onSessionScanned(sessionId: string) {
+	private onSessionScanned = (sessionId: string) => {
 		this.client.connectTo(sessionId);
 	}
 

@@ -36,7 +36,7 @@ class RTCClient extends EventEmitter {
 			this.pc.onicecandidate = this.onLocalIceCandidate;
 			this.pc.ondatachannel = this.onDataChannel;
 
-			this.sendChannel = this.pc.createDataChannel('sendChannel');
+			this.sendChannel = this.pc.createDataChannel('Swift Data Channel');
 			this.sendChannel.onopen = this.onSendChannelOpen;
 			this.sendChannel.onclose = this.onSendChannelClose;
 		} catch (error) {
@@ -56,16 +56,20 @@ class RTCClient extends EventEmitter {
 	}
 
 	public async connectTo(remoteId: string) {
+		log('connectTo', remoteId);
 		if (this.gatewayClient.isConnected) {
 			await this.gatewayClient.connect();
 		}
 		this.remoteId = remoteId;
+		log('create offer');
 		const sessionDescription = await this.pc.createOffer() as any;
-		this.pc.setLocalDescription(sessionDescription);
+		log('offer created');
+		await this.pc.setLocalDescription(sessionDescription);
+		log('sending session desciption', sessionDescription);
 		this.gatewayClient.send(remoteId, { type: 'offer', sessionDescription });
 	}
 
-	private async onGatewayMessage(fromId: string, msg: Message) {
+	private onGatewayMessage = async (fromId: string, msg: Message) => {
 		this.remoteId = fromId;
 		log('received message', msg);
 		if (msg.type === 'offer') {
@@ -85,7 +89,8 @@ class RTCClient extends EventEmitter {
 	}
 
 	private onSendChannelOpen = (e: Event) => {
-		log('onSendChannelOpen', e);
+		log('data channel opened');
+		this.setupDataChannel();
 	}
 
 	private onSendChannelClose = (e: Event) => {
@@ -93,7 +98,19 @@ class RTCClient extends EventEmitter {
 	}
 
 	private onDataChannel = (e: RTCDataChannelEvent) => {
-		log('onDataChannel', e);
+		log('data channel opened');
+		this.sendChannel = e.channel;
+		this.setupDataChannel();
+	}
+
+	private setupDataChannel() {
+		(window as any).sendMessage = (data: any) => {
+			this.sendChannel.send(JSON.stringify(data));
+		};
+
+		this.sendChannel.onmessage = (event) => {
+			console.log(JSON.parse(event.data));
+		};
 	}
 
 	private onLocalIceCandidate = (e: RTCPeerConnectionIceEvent) => {
