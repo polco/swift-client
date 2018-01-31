@@ -1,4 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import Home from './views/Home';
 
-ReactDOM.render(<div className='swift'>test mobile...</div>, document.getElementById('swift'));
+localStorage.setItem('debug', 'swift*');
+
+ReactDOM.render(<Home />, document.getElementById('swift'));
