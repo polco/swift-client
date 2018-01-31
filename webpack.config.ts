@@ -1,6 +1,7 @@
 import * as debug from 'debug-logger';
 import * as ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import * as HtmlWebpackPlugin from 'html-webpack-plugin';
+import * as ip from 'ip';
 import * as path from 'path';
 import * as UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import * as webpack from 'webpack';
@@ -14,6 +15,12 @@ log('create webpack configuration');
 function isExternal(module: any) {
 	return module.context && module.context.includes('node_modules');
 }
+
+const serverEndPoint = isDev
+	? `http://${ip.address()}:${process.env.PORT || 3434}`
+	: 'https://swift-gateway.herokuapp.com';
+
+log(`Socket server end point will be ${serverEndPoint}`);
 
 const plugins: webpack.Plugin[] = [
 	new ForkTsCheckerWebpackPlugin({ checkSyntacticErrors: true  }),
@@ -47,7 +54,7 @@ const plugins: webpack.Plugin[] = [
 		template: path.join('src', 'index.html')
 	}),
 	new webpack.DefinePlugin({
-		__SOCKET_END_POINT__: JSON.stringify(isDev ? 'http://192.168.11.2:3434' : 'https://swift-gateway.herokuapp.com')
+		__SOCKET_END_POINT__: JSON.stringify(serverEndPoint)
 	})
 ];
 
