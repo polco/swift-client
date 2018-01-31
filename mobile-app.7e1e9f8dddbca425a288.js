@@ -1,2 +1,0 @@
-webpackJsonp([2],{"./src/mobile/app.tsx":function(e,t,s){"use strict";Object.defineProperty(t,"__esModule",{value:!0});const o=s("./node_modules/react/index.js");s("./node_modules/react-dom/index.js").render(o.createElement("div",{className:"swift"},"test mobile..."),document.getElementById("swift"))}},["./src/mobile/app.tsx"]);
-//# sourceMappingURL=mobile-app.7e1e9f8dddbca425a288.js.map
