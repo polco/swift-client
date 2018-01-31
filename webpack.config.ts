@@ -45,6 +45,9 @@ const plugins: webpack.Plugin[] = [
 			collapseWhitespace: !isDev
 		},
 		template: path.join('src', 'index.html')
+	}),
+	new webpack.DefinePlugin({
+		__SOCKET_END_POINT__: JSON.stringify(isDev ? 'http://192.168.11.2:3434' : 'https://swift-gateway.herokuapp.com')
 	})
 ];
 
