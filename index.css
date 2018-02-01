@@ -1,0 +1,73 @@
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	overflow: hidden;
+}
+
+body {
+	margin: 0;
+	color: #272727;
+	font-size: 12px;
+	font-family: 'Open Sans', sans-serif;
+	line-height: 1;
+	-webkit-text-size-adjust: 100%;
+	-ms-text-size-adjust: none;
+	-webkit-font-smoothing: antialiased;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+#swift {
+	width: 100%;
+	height: 100%;
+}
+
+*:focus {
+	outline: none;
+}
+
+select {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+}
+
+input[type="button"],
+input[type="reset"],
+input[type="file"],
+input[type="submit"] {
+	-webkit-appearance: none;
+	border-radius: 0;
+	cursor: pointer;
+}
+
+input, textarea {
+	color: inherit;
+	padding: 0;
+	-webkit-appearance: none;
+	-webkit-border-radius: 0;
+	-moz-appearance: none;
+	border: none;
+	background-color: transparent;
+}
+
+input::-webkit-input-placeholder {
+	color: inherit;
+	letter-spacing: inherit;
+}
+
+input:focus::-webkit-input-placeholder { color: transparent; }
+input:focus::-moz-placeholder { color: transparent; } /* FF 19+ */
+input:focus:-ms-input-placeholder { color: transparent; } /* IE 10+ */
+
+ul {
+	-webkit-padding-start: 0;
+}
