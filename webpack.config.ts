@@ -1,4 +1,6 @@
+import * as CopyWebpackPlugin from 'copy-webpack-plugin';
 import * as debug from 'debug-logger';
+import * as ExtractTextPlugin from 'extract-text-webpack-plugin';
 import * as ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import * as HtmlWebpackPlugin from 'html-webpack-plugin';
 import * as ip from 'ip';
@@ -19,6 +21,7 @@ function isExternal(module: any) {
 const serverEndPoint = isDev
 	? `https://${ip.address()}:${process.env.PORT || 3434}`
 	: 'https://swift-gateway.herokuapp.com';
+const publicPath = isDev ? './' : 'https://polco.github.io/swift-client/';
 
 log(`Socket server end point will be ${serverEndPoint}`);
 
@@ -55,7 +58,11 @@ const plugins: webpack.Plugin[] = [
 	}),
 	new webpack.DefinePlugin({
 		__SOCKET_END_POINT__: JSON.stringify(serverEndPoint)
-	})
+	}),
+	new ExtractTextPlugin({
+		filename: isDev ? '[name].css' : '[name].[chunkhash].css'
+	}),
+	new CopyWebpackPlugin([{ from: 'src/index.css' }])
 ];
 
 if (!isDev) {
@@ -70,6 +77,9 @@ if (!isDev) {
 } else {
 	plugins.push(new webpack.HotModuleReplacementPlugin());
 }
+
+const desktopEntry = './src/desktop/app.tsx';
+const mobileEntry = './src/mobile/app.tsx';
 
 const webpackConfig: webpack.Configuration = {
 	target: 'web',
@@ -89,15 +99,27 @@ const webpackConfig: webpack.Configuration = {
 				include: /src/,
 				exclude: /node_modules/,
 				use: 'ts-loader',
-			}
+			},
+			{
+				test: /\.less$/,
+				include: /src/,
+				use: ExtractTextPlugin.extract({
+					use: [
+						{ loader: 'css-loader', options: { sourceMap: true, importLoaders: 2, root: publicPath } },
+						{ loader: 'postcss-loader', options: { sourceMap: true } },
+						{ loader: 'less-loader', options: { sourceMap: true } }
+					],
+					publicPath
+				})
+			},
 		]
 	},
 	entry: {
-		'desktop-app': './src/desktop/app.tsx',
-		'mobile-app': './src/mobile/app.tsx',
+		'desktop-app': desktopEntry,
+		'mobile-app': mobileEntry,
 	},
 	output: {
-		publicPath: isDev ? './' : 'https://polco.github.io/swift-client/',
+		publicPath,
 		path: path.join(__dirname, 'dist'),
 		filename: isDev ? '[name].js' : '[name].[chunkhash].js'
 	},

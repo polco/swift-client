@@ -10,7 +10,7 @@ class GatewayClient<T> extends EventEmitter {
 		super();
 		this.socket = SocketIO(__SOCKET_END_POINT__, { transports: ['websocket'], autoConnect: false });
 
-		this.socket.on('data', ({ fromId, data }: { data: T, fromId: string }) => {
+		this.socket.on('data', (fromId: string, data: T) => {
 			log('received data', data);
 			this.emit('message', fromId, data);
 		});
@@ -50,11 +50,8 @@ class GatewayClient<T> extends EventEmitter {
 	}
 
 	public send(remoteId: string, data: T) {
-		log('sending to', data, 'to', remoteId);
-		this.socket.emit('data', {
-			remoteId,
-			data
-		});
+		log('sending', data, 'to', remoteId);
+		this.socket.emit('data', remoteId, data);
 	}
 }
 

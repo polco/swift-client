@@ -11,9 +11,9 @@ type Message =
 class RTCClient extends EventEmitter {
 	private pc: RTCPeerConnection;
 	// private remoteConnection: RTCPeerConnection;
-	private sendChannel: RTCDataChannel;
+	private sendChannel: RTCDataChannel | null = null;
 	private gatewayClient: GatewayClient<Message>;
-	private remoteId: string;
+	private remoteId: string = '';
 	public sessionCreating = false;
 	public sessionCreated = false;
 
@@ -29,19 +29,11 @@ class RTCClient extends EventEmitter {
 			}
 		});
 
-		try {
-			this.pc = new RTCPeerConnection({
-				iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-			});
-			this.pc.onicecandidate = this.onLocalIceCandidate;
-			this.pc.ondatachannel = this.onDataChannel;
-
-			this.sendChannel = this.pc.createDataChannel('Swift Data Channel');
-			this.sendChannel.onopen = this.onSendChannelOpen;
-			this.sendChannel.onclose = this.onSendChannelClose;
-		} catch (error) {
-			log(error);
-		}
+		this.pc = new RTCPeerConnection({
+			iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+		});
+		this.pc.onicecandidate = this.onLocalIceCandidate;
+		this.pc.ondatachannel = this.onDataChannel;
 	}
 
 	get localId(): string { return this.gatewayClient.localId; }
@@ -60,18 +52,20 @@ class RTCClient extends EventEmitter {
 		if (this.gatewayClient.isConnected) {
 			await this.gatewayClient.connect();
 		}
+		this.sendChannel = this.pc.createDataChannel('Swift Data Channel');
+		this.sendChannel.onopen = this.onSendChannelOpen;
+		this.sendChannel.onclose = this.onSendChannelClose;
+
 		this.remoteId = remoteId;
 		log('create offer');
 		const sessionDescription = await this.pc.createOffer() as any;
 		log('offer created');
 		await this.pc.setLocalDescription(sessionDescription);
-		log('sending session desciption', sessionDescription);
 		this.gatewayClient.send(remoteId, { type: 'offer', sessionDescription });
 	}
 
 	private onGatewayMessage = async (fromId: string, msg: Message) => {
 		this.remoteId = fromId;
-		log('received message', msg);
 		if (msg.type === 'offer') {
 			this.pc.setRemoteDescription(new RTCSessionDescription(msg.sessionDescription));
 			const sessionDescription = await this.pc.createAnswer() as any;
@@ -105,10 +99,10 @@ class RTCClient extends EventEmitter {
 
 	private setupDataChannel() {
 		(window as any).sendMessage = (data: any) => {
-			this.sendChannel.send(JSON.stringify(data));
+			this.sendChannel!.send(JSON.stringify(data));
 		};
 
-		this.sendChannel.onmessage = (event) => {
+		this.sendChannel!.onmessage = (event) => {
 			console.log(JSON.parse(event.data)); // tslint:disable-line
 		};
 	}

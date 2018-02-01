@@ -1,5 +1,6 @@
 import * as QRCode from 'qrcode.react';
 import * as React from 'react';
+import Button from 'shared/components/Button';
 import RTCClient from 'shared/RTCClient';
 
 export type Props = {
@@ -16,10 +17,9 @@ class SessionDisplay extends React.PureComponent<Props, State> {
 		super(props, context);
 
 		this.state = {
-			sessionCreating: true
+			sessionCreating: props.client.sessionCreating,
+			sessionId: props.client.localId
 		};
-
-		props.client.startSession();
 	}
 
 	public componentWillMount() {
@@ -40,6 +40,11 @@ class SessionDisplay extends React.PureComponent<Props, State> {
 		this.setState({ sessionId: undefined, sessionCreating: false });
 	}
 
+	private createSession = () => {
+		this.props.client.startSession();
+		this.setState({ sessionCreating: true });
+	}
+
 	public render() {
 		const { sessionId, sessionCreating } = this.state;
 
@@ -51,7 +56,7 @@ class SessionDisplay extends React.PureComponent<Props, State> {
 						<QRCode value={ sessionId } size={ 256 } />
 						<div className='session-display__id'>{ 'id: ' + sessionId }</div>
 					</div>
-				: null }
+				: <Button onTap={ this.createSession }>Create Session</Button> }
 			</div>
 		);
 	}

@@ -12,7 +12,7 @@ type State = {
 };
 
 class SessionDisplay extends React.PureComponent<Props, State> {
-	private videoElt: HTMLVideoElement | null;
+	private videoElt: HTMLVideoElement | null = null;
 	private scanner: any;
 
 	constructor (props: Props, context: any) {
