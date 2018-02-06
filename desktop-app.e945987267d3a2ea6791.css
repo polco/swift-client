@@ -1,2 +1,0 @@
-.button{cursor:pointer}.button.disabled{cursor:auto}.Main{width:100%;height:100%}.Main__tabs{display:flex;justify-content:center;box-shadow:0 0 5px rgba(0,0,0,.55);position:relative}.Main__tabs__indicator{position:absolute;bottom:0;left:0;width:100px;height:3px;background-color:#e74242}.Main__tab{padding:20px 40px;font-size:14px;font-weight:600;transition:background-color .15s linear}.Main__tab:hover{background-color:hsla(0,0%,78%,.1)}
-/*# sourceMappingURL=desktop-app.e945987267d3a2ea6791.css.map*/
