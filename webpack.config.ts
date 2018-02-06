@@ -57,7 +57,8 @@ const plugins: webpack.Plugin[] = [
 		template: path.join('src', 'index.html')
 	}),
 	new webpack.DefinePlugin({
-		__SOCKET_END_POINT__: JSON.stringify(serverEndPoint)
+		__SOCKET_END_POINT__: JSON.stringify(serverEndPoint),
+		__IS_DEV__: JSON.stringify(isDev)
 	}),
 	new ExtractTextPlugin({
 		filename: isDev ? '[name].css' : '[name].[chunkhash].css'

@@ -4,6 +4,7 @@ import GatewayClient from 'shared/GatewayClient';
 const log = debug('swift:RTCClient');
 
 type Message =
+	{ type: 'client', sessionId: string } |
 	{ type: 'offer', sessionDescription: RTCSessionDescriptionInit } |
 	{ type: 'answer', sessionDescription: RTCSessionDescriptionInit } |
 	{ type: 'candidate', candidate: RTCIceCandidateInit };
@@ -13,7 +14,8 @@ class RTCClient extends EventEmitter {
 	// private remoteConnection: RTCPeerConnection;
 	private sendChannel: RTCDataChannel | null = null;
 	private gatewayClient: GatewayClient<Message>;
-	private remoteId: string = '';
+	private currentRemoteId: string = '';
+	public sessionId = '';
 	public sessionCreating = false;
 	public sessionCreated = false;
 
@@ -36,41 +38,52 @@ class RTCClient extends EventEmitter {
 		this.pc.ondatachannel = this.onDataChannel;
 	}
 
-	get localId(): string { return this.gatewayClient.localId; }
-
-	public async startSession() {
+	public async openSession(sessionId: string) {
 		if (this.sessionCreating) { return; }
+		this.sessionId = sessionId;
 		this.sessionCreating = true;
 		await this.gatewayClient.connect();
+		this.gatewayClient.openSession(sessionId);
 		this.sessionCreating = false;
 		this.sessionCreated = true;
-		this.emit('sessionStarted', this.gatewayClient.localId);
+		this.emit('sessionOpened', sessionId);
 	}
 
-	public async connectTo(remoteId: string) {
-		log('connectTo', remoteId);
-		if (this.gatewayClient.isConnected) {
-			await this.gatewayClient.connect();
+	public async closeSession() {
+		if (!this.sessionCreated) { return; }
+		this.sessionCreated = false;
+		this.gatewayClient.closeSession(this.sessionId);
+		this.emit('sessionClosed', this.sessionId);
+	}
+
+	public async joinSession(sessionId: string) {
+		log('joinSession', sessionId);
+		if (!this.gatewayClient.isConnected) {
+			try {
+				await this.gatewayClient.connect();
+			} catch (e) {
+				log('Connection error', e);
+			}
 		}
 		this.sendChannel = this.pc.createDataChannel('Swift Data Channel');
 		this.sendChannel.onopen = this.onSendChannelOpen;
 		this.sendChannel.onclose = this.onSendChannelClose;
 
-		this.remoteId = remoteId;
+		this.sessionId = sessionId;
 		log('create offer');
 		const sessionDescription = await this.pc.createOffer() as any;
 		log('offer created');
 		await this.pc.setLocalDescription(sessionDescription);
-		this.gatewayClient.send(remoteId, { type: 'offer', sessionDescription });
+		this.gatewayClient.send(null, sessionId, { type: 'offer', sessionDescription });
 	}
 
 	private onGatewayMessage = async (fromId: string, msg: Message) => {
-		this.remoteId = fromId;
 		if (msg.type === 'offer') {
+			this.currentRemoteId = fromId;
 			this.pc.setRemoteDescription(new RTCSessionDescription(msg.sessionDescription));
 			const sessionDescription = await this.pc.createAnswer() as any;
 			this.pc.setLocalDescription(sessionDescription);
-			this.gatewayClient.send(fromId, { type: 'answer', sessionDescription });
+			this.gatewayClient.send(fromId, this.sessionId, { type: 'answer', sessionDescription });
 		} else if (msg.type === 'answer') {
 			this.pc.setRemoteDescription(msg.sessionDescription);
 		} else if (msg.type === 'candidate') {
@@ -85,6 +98,7 @@ class RTCClient extends EventEmitter {
 	private onSendChannelOpen = (e: Event) => {
 		log('data channel opened');
 		this.setupDataChannel();
+		this.gatewayClient.disconnect();
 	}
 
 	private onSendChannelClose = (e: Event) => {
@@ -95,6 +109,8 @@ class RTCClient extends EventEmitter {
 		log('data channel opened');
 		this.sendChannel = e.channel;
 		this.setupDataChannel();
+		this.gatewayClient.closeSession(this.sessionId);
+		this.gatewayClient.disconnect();
 	}
 
 	private setupDataChannel() {
@@ -110,7 +126,7 @@ class RTCClient extends EventEmitter {
 	private onLocalIceCandidate = (e: RTCPeerConnectionIceEvent) => {
 		if (!e.candidate) { return; }
 
-		this.gatewayClient.send(this.remoteId, {
+		this.gatewayClient.send(this.currentRemoteId, this.sessionId, {
 			type: 'candidate',
 			candidate: {
 				sdpMLineIndex: e.candidate.sdpMLineIndex,

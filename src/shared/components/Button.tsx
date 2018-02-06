@@ -14,13 +14,14 @@ export type Props<P = {}> = {
 	disabled?: boolean,
 	className?: string,
 	style?: React.CSSProperties,
-	elementRef?: (ref: HTMLDivElement | undefined) => void,
+	elementRef?: (ref: HTMLDivElement | null) => void,
 	onTap?: (component: Button<P>, e: SpurPointerEvent) => void,
 	onDoubleTap?: (component: Button<P>, e: SpurPointerEvent) => void,
 } & P;
 
-class Button<P = {}> extends React.PureComponent<Props<P>> {
+class Button<P = Props> extends React.PureComponent<Props<P>> {
 	private plugins: { button: ButtonPlugin };
+	public div: HTMLDivElement | null = null;
 
 	constructor(props: Props<P>, context: any) {
 		super(props, context);
@@ -51,6 +52,11 @@ class Button<P = {}> extends React.PureComponent<Props<P>> {
 		this.props.onDoubleTap!(this, e);
 	}
 
+	private onRef = (div: HTMLDivElement | null) => {
+		this.div = div;
+		if (this.props.elementRef) { this.props.elementRef(div); }
+	}
+
 	public render() {
 		const { className, disabled, children, style } = this.props;
 
@@ -61,7 +67,7 @@ class Button<P = {}> extends React.PureComponent<Props<P>> {
 
 		const props = {
 			className: cn,
-			elementRef: this.props.elementRef,
+			elementRef: this.onRef,
 			plugins: this.plugins,
 			style
 		};

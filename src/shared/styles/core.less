@@ -1,0 +1,54 @@
+.view {
+	&__explanation {
+		font-size: 13px;
+		font-weight: 600;
+	}
+
+	&__box {
+		background-color: rgb(240, 240, 240);
+		margin: 10px 0;
+		display: flex;
+	}
+
+	&__column {
+		display: flex;
+		flex-direction: column;
+
+		.TextField + .TextField {
+			margin-top: 30px;
+		}
+	}
+
+	&__header {
+		font-size: 14px;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+	}
+}
+
+.desktop .view {
+	&__box { padding: 40px; }
+	&__header { margin-right: 20px; }
+}
+
+.mobile .view {
+	&__box {
+		padding: 20px;
+		flex-wrap: wrap;
+	}
+	&__header {
+		flex: 1 0 100%;
+		margin-bottom: 20px;
+	}
+}
+
+.action-button {
+	padding: 8px 20px;
+	background-color: #4850b9;
+	color: #fff;
+	font-weight: 600;
+	font-size: 14px;
+	display: flex;
+	justify-content: center;
+}

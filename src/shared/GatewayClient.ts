@@ -5,30 +5,33 @@ const log = debug('swift:GatewayClient');
 
 class GatewayClient<T> extends EventEmitter {
 	private socket: SocketIOClient.Socket;
+	private isConnecting = false;
 
 	constructor() {
 		super();
 		this.socket = SocketIO(__SOCKET_END_POINT__, { transports: ['websocket'], autoConnect: false });
 
-		this.socket.on('data', (fromId: string, data: T) => {
+		this.socket.on('data', (fromId: string, sessionId: string, data: T) => {
 			log('received data', data);
 			this.emit('message', fromId, data);
 		});
 		this.socket.on('error', (error: any) => log(error));
 		this.socket.on('disconnect', () => {
-			log(`${this.localId}: Disconnected from the gateway`);
+			log(`Disconnected from the gateway`);
 			this.emit('disconnected');
 		});
 	}
 
 	public connect(): Promise<void> {
-		if (this.socket.connected) { return Promise.resolve(); }
+		if (this.isConnecting || this.socket.connected) { return Promise.resolve(); }
+		this.isConnecting = true;
 
 		return new Promise((resolve, reject) => {
 			this.socket.connect();
 
 			this.socket.once('connect', () => {
-				log(`${this.localId}: Connected to the gateway`);
+				this.isConnecting = false;
+				log(`Connected to the gateway`);
 				this.socket.removeListener('connect_error');
 				this.socket.removeListener('connect_timeout');
 				resolve();
@@ -38,20 +41,27 @@ class GatewayClient<T> extends EventEmitter {
 		});
 	}
 
-	get isConnected(): boolean { return this.socket.connected; }
+	public openSession(sessionId: string) {
+		this.socket.emit('openSession', sessionId);
+	}
 
-	get localId(): string { return this.socket.id; }
+	public closeSession(sessionId: string) {
+		this.socket.emit('closeSession', sessionId);
+	}
+
+	get isConnected(): boolean { return this.socket.connected; }
 
 	public disconnect() {
 		if (!this.socket.connected) { return; }
+		this.isConnecting = false;
 		this.socket.disconnect();
 		this.socket.removeListener('connect_error');
 		this.socket.removeListener('connect_timeout');
 	}
 
-	public send(remoteId: string, data: T) {
-		log('sending', data, 'to', remoteId);
-		this.socket.emit('data', remoteId, data);
+	public send(remoteId: string | null, sessionId: string, data: T) {
+		log('sending', data, 'to', remoteId, 'for session', sessionId);
+		this.socket.emit('data', remoteId, sessionId, data);
 	}
 }
 
