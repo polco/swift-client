@@ -93,8 +93,6 @@ class Store {
 
 	private onDocChange = (change: IObjectChange) => {
 		// TODO implement the logic to update clients with those new data
-		debugger;
-		console.log('onDocChange', change);
 	}
 
 	public getSession(sessionId: string): Session {
