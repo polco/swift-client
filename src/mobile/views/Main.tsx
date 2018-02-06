@@ -38,17 +38,7 @@ class Main extends React.PureComponent<Props, State> {
 
 		this.store = new Store();
 		this.RTCClient = new RTCClient();
-		this.RTCClient.on('sessionOpened', this.onSessionOpened);
-		this.RTCClient.on('sessionJoined', this.onSessionJoined);
 		this.state = { tabId: 'create' };
-	}
-
-	private onSessionOpened = (sessionId: string) => {
-		//
-	}
-
-	private onSessionJoined = (sessionId: string) => {
-		//
 	}
 
 	public static childContextTypes = contextTypes;
