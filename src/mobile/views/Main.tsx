@@ -6,7 +6,6 @@ configureDevtool({
 });
 
 import { Context, contextTypes } from 'shared/context';
-import RTCClient from 'shared/RTCClient';
 import Store from 'shared/Store';
 
 import CreateSession from 'shared/views/CreateSession';
@@ -31,20 +30,18 @@ const ContentClasses: {[tabId in TabId]: React.ComponentClass} = {
 
 class Main extends React.PureComponent<Props, State> {
 	private store: Store;
-	private RTCClient: RTCClient;
 
 	constructor(props: Props, context: any) {
 		super(props, context);
 
 		this.store = new Store();
-		this.RTCClient = new RTCClient();
 		this.state = { tabId: 'create' };
 	}
 
 	public static childContextTypes = contextTypes;
 
 	public getChildContext(): Context {
-		return { RTCClient: this.RTCClient, store: this.store };
+		return { store: this.store };
 	}
 
 	private selectTab = (tabId: TabId) => {
@@ -57,12 +54,12 @@ class Main extends React.PureComponent<Props, State> {
 
 		return (
 			<div className='Main'>
+				<div className='Main__tab-container'><ContentClass /></div>
 				<Tabs
 					tabs={ TabsInfo }
 					currentTabId={ currentTabId }
 					onTabSelect={ this.selectTab }
 				/>
-				<div className='Main__tab-container'><ContentClass /></div>
 				{ __IS_DEV__ &&  <DevTools /> }
 			</div>
 		);

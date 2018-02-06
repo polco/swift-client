@@ -11,25 +11,18 @@ type Message =
 
 class RTCClient extends EventEmitter {
 	private pc: RTCPeerConnection;
-	// private remoteConnection: RTCPeerConnection;
+	private gatewayClient: GatewayClient;
 	private sendChannel: RTCDataChannel | null = null;
-	private gatewayClient: GatewayClient<Message>;
-	private currentRemoteId: string = '';
-	public sessionId = '';
+	private remoteUserId: string;
 	public sessionCreating = false;
 	public sessionCreated = false;
 
-	constructor() {
+	constructor(remoteUserId: string, gatewayClient: GatewayClient) {
 		super();
-		this.gatewayClient = new GatewayClient();
-		this.gatewayClient.on('message', this.onGatewayMessage);
-		this.gatewayClient.on('disconnected', () => {
-			this.sessionCreating = false;
-			if (this.sessionCreated) {
-				this.sessionCreated = false;
-				this.emit('sessionStopped');
-			}
-		});
+
+		this.gatewayClient = gatewayClient;
+		this.gatewayClient.on('data', this.onGatewayMessage);
+		this.remoteUserId = remoteUserId;
 
 		this.pc = new RTCPeerConnection({
 			iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
@@ -38,52 +31,27 @@ class RTCClient extends EventEmitter {
 		this.pc.ondatachannel = this.onDataChannel;
 	}
 
-	public async openSession(sessionId: string) {
-		if (this.sessionCreating) { return; }
-		this.sessionId = sessionId;
-		this.sessionCreating = true;
-		await this.gatewayClient.connect();
-		this.gatewayClient.openSession(sessionId);
-		this.sessionCreating = false;
-		this.sessionCreated = true;
-		this.emit('sessionOpened', sessionId);
-	}
-
-	public async closeSession() {
-		if (!this.sessionCreated) { return; }
-		this.sessionCreated = false;
-		this.gatewayClient.closeSession(this.sessionId);
-		this.emit('sessionClosed', this.sessionId);
-	}
-
-	public async joinSession(sessionId: string) {
-		log('joinSession', sessionId);
-		if (!this.gatewayClient.isConnected) {
-			try {
-				await this.gatewayClient.connect();
-			} catch (e) {
-				log('Connection error', e);
-			}
-		}
-		this.sendChannel = this.pc.createDataChannel('Swift Data Channel');
+	public async initiateConnection() {
+		log('initiateConnection');
+		this.sendChannel = this.pc.createDataChannel('Swift Data Channel with ' + this.remoteUserId);
 		this.sendChannel.onopen = this.onSendChannelOpen;
 		this.sendChannel.onclose = this.onSendChannelClose;
+		this.sendChannel.onerror = this.onSendChannelError;
 
-		this.sessionId = sessionId;
 		log('create offer');
 		const sessionDescription = await this.pc.createOffer() as any;
 		log('offer created');
 		await this.pc.setLocalDescription(sessionDescription);
-		this.gatewayClient.send(null, sessionId, { type: 'offer', sessionDescription });
+		this.gatewayClient.send(this.remoteUserId, { type: 'offer', sessionDescription });
 	}
 
-	private onGatewayMessage = async (fromId: string, msg: Message) => {
+	public onGatewayMessage = async (fromUserId: string, msg: Message) => {
+		if (fromUserId !== this.remoteUserId) { return; }
 		if (msg.type === 'offer') {
-			this.currentRemoteId = fromId;
 			this.pc.setRemoteDescription(new RTCSessionDescription(msg.sessionDescription));
 			const sessionDescription = await this.pc.createAnswer() as any;
 			this.pc.setLocalDescription(sessionDescription);
-			this.gatewayClient.send(fromId, this.sessionId, { type: 'answer', sessionDescription });
+			this.gatewayClient.send(this.remoteUserId, { type: 'answer', sessionDescription });
 		} else if (msg.type === 'answer') {
 			this.pc.setRemoteDescription(msg.sessionDescription);
 		} else if (msg.type === 'candidate') {
@@ -98,35 +66,43 @@ class RTCClient extends EventEmitter {
 	private onSendChannelOpen = (e: Event) => {
 		log('data channel opened');
 		this.setupDataChannel();
-		this.gatewayClient.disconnect();
 	}
 
 	private onSendChannelClose = (e: Event) => {
 		log('onSendChannelClose', e);
 	}
 
+	private onSendChannelError = (e: ErrorEvent) => {
+		log('onSendChannelError', e);
+	}
+
 	private onDataChannel = (e: RTCDataChannelEvent) => {
 		log('data channel opened');
 		this.sendChannel = e.channel;
 		this.setupDataChannel();
-		this.gatewayClient.closeSession(this.sessionId);
-		this.gatewayClient.disconnect();
 	}
 
 	private setupDataChannel() {
-		(window as any).sendMessage = (data: any) => {
-			this.sendChannel!.send(JSON.stringify(data));
-		};
-
 		this.sendChannel!.onmessage = (event) => {
-			console.log(JSON.parse(event.data)); // tslint:disable-line
+			const { type, data } = JSON.parse(event.data);
+			this.emit(type, data);
 		};
+		this.gatewayClient.removeListener('data', this.onGatewayMessage);
+		this.emit('connect');
+	}
+
+	public sendMessage(type: string, data: any) {
+		if (this.sendChannel) {
+			this.sendChannel.send(JSON.stringify({ type, data }));
+		} else {
+			log('trying to send a message before the channel is opened');
+		}
 	}
 
 	private onLocalIceCandidate = (e: RTCPeerConnectionIceEvent) => {
 		if (!e.candidate) { return; }
 
-		this.gatewayClient.send(this.currentRemoteId, this.sessionId, {
+		this.gatewayClient.send(this.remoteUserId, {
 			type: 'candidate',
 			candidate: {
 				sdpMLineIndex: e.candidate.sdpMLineIndex,

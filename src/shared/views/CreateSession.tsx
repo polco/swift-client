@@ -5,23 +5,26 @@ import CreateSessionAction from 'shared/actions/CreateSession';
 
 import Button from 'shared/components/Button';
 import TextField from 'shared/components/TextField';
+import { Context, contextTypes } from 'shared/context';
 
 import './CreateSession.less';
 
 export type Props = {};
 
 class CreateSession extends React.PureComponent<Props> {
+	public context!: Context;
+	public static contextTypes = contextTypes;
 	private sessionNameField!: TextField | null;
-	private userNameField!: TextField | null;
 
 	private createSession = () => {
-		const sessionId = uuid();
-		this.context.store.executeAction(new CreateSessionAction(
+		const sessionId = 'session-' + uuid();
+		const store = this.context.store;
+		store.executeAction(new CreateSessionAction(
 			sessionId,
 			this.sessionNameField!.getValue(),
-			this.userNameField!.getValue()
+			store.user.id
 		));
-		this.context.RTCClient.openSession(sessionId);
+		store.openSession(sessionId);
 	}
 
 	public render() {
@@ -34,11 +37,6 @@ class CreateSession extends React.PureComponent<Props> {
 							label='choose a name for your session'
 							placeholder='My session'
 							ref={ ref => this.sessionNameField = ref }
-						/>
-						<TextField
-							label='choose a name to identify yourself'
-							placeholder='Albert'
-							ref={ ref => this.userNameField = ref }
 						/>
 					</div>
 					<div className='view__column CreateSession__create-column'>

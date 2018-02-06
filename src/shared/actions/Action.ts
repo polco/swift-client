@@ -1,13 +1,15 @@
 import { action } from 'mobx';
 import Store from 'shared/Store';
 
-export type actionType = 'createSession';
+export type ActionsType =
+	'createSession' | 'createUser' | 'updateSessionName' | 'addSessionUser' |
+	'updateUserName' | 'docsUpdate' | 'addSession';
 
 abstract class IAction {
-	public type: actionType;
+	public type: ActionsType;
 	protected store!: Store;
 
-	constructor(type: actionType) {
+	constructor(type: ActionsType) {
 		this.type = type;
 	}
 

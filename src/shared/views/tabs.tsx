@@ -6,7 +6,7 @@ export type TabId = 'sessions' | 'create' | 'join';
 
 // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/20544
 const SessionLabel: React.StatelessComponent = observer(function (this: { context: Context }) {
-	const sessions = this.context.store.sessions;
+	const sessions = this.context.store.sessionList;
 	return ('My sessions' + (sessions.length ? ` (${sessions.length})` : '' )) as any;
 });
 SessionLabel.contextTypes = contextTypes;

@@ -3,26 +3,32 @@ import { EventEmitter } from 'events';
 import * as SocketIO from 'socket.io-client';
 const log = debug('swift:GatewayClient');
 
-class GatewayClient<T> extends EventEmitter {
+class GatewayClient extends EventEmitter {
 	private socket: SocketIOClient.Socket;
 	private isConnecting = false;
 
-	constructor() {
+	constructor(userId: string) {
 		super();
-		this.socket = SocketIO(__SOCKET_END_POINT__, { transports: ['websocket'], autoConnect: false });
+		this.socket = SocketIO(__SOCKET_END_POINT__, { transports: ['websocket'], autoConnect: false, query: { userId } });
 
-		this.socket.on('data', (fromId: string, sessionId: string, data: T) => {
+		this.socket.on('data', (fromId: string, data: any) => {
 			log('received data', data);
-			this.emit('message', fromId, data);
+			this.emit('data', fromId, data);
 		});
 		this.socket.on('error', (error: any) => log(error));
 		this.socket.on('disconnect', () => {
 			log(`Disconnected from the gateway`);
 			this.emit('disconnected');
 		});
+		this.socket.on('join', (sessionId: string, remoteUserId: string) => {
+			this.emit('join', sessionId, remoteUserId);
+		});
+		this.socket.on('sessionUser', (sessionId: string, remoteUserId: string) => {
+			this.emit('sessionUser', sessionId, remoteUserId);
+		});
 	}
 
-	public connect(): Promise<void> {
+	private connect(): Promise<void> {
 		if (this.isConnecting || this.socket.connected) { return Promise.resolve(); }
 		this.isConnecting = true;
 
@@ -41,17 +47,23 @@ class GatewayClient<T> extends EventEmitter {
 		});
 	}
 
-	public openSession(sessionId: string) {
+	public async openSession(sessionId: string) {
+		if (!this.socket.connected) { await this.connect(); }
 		this.socket.emit('openSession', sessionId);
 	}
 
-	public closeSession(sessionId: string) {
+	public async closeSession(sessionId: string) {
+		if (!this.socket.connected) { await this.connect(); }
 		this.socket.emit('closeSession', sessionId);
+		this.disconnect();
 	}
 
-	get isConnected(): boolean { return this.socket.connected; }
+	public async joinSession(sessionId: string) {
+		if (!this.socket.connected) { await this.connect(); }
+		this.socket.emit('join', sessionId);
+	}
 
-	public disconnect() {
+	private disconnect() {
 		if (!this.socket.connected) { return; }
 		this.isConnecting = false;
 		this.socket.disconnect();
@@ -59,9 +71,10 @@ class GatewayClient<T> extends EventEmitter {
 		this.socket.removeListener('connect_timeout');
 	}
 
-	public send(remoteId: string | null, sessionId: string, data: T) {
-		log('sending', data, 'to', remoteId, 'for session', sessionId);
-		this.socket.emit('data', remoteId, sessionId, data);
+	public async send(remoteUserId: string, data: any) {
+		if (!this.socket.connected) { await this.connect(); }
+		log('sending', data, 'to', remoteUserId);
+		this.socket.emit('data', remoteUserId, data);
 	}
 }
 

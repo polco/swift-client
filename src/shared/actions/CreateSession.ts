@@ -1,23 +1,24 @@
 import Session from 'shared/models/Session';
-import User from 'shared/models/User';
 
 import Action from './Action';
 
 class CreateSession extends Action {
 	private id: string;
 	private name: string;
-	private userName: string;
+	private ownerId: string;
 
-	constructor(id: string, name: string, userName: string) {
+	constructor(id: string, name: string, ownerId: string) {
 		super('createSession');
 
 		this.id = id;
 		this.name = name;
-		this.userName = userName;
+		this.ownerId = ownerId;
 	}
 
 	protected execute() {
-		this.store.sessions.push(new Session(this.id, this.name, [new User(this.userName)]));
+		const session = new Session(this.id, this.name, this.ownerId);
+		this.store.sessionList.push(this.id);
+		this.store.addDoc(session);
 		return true;
 	}
 }

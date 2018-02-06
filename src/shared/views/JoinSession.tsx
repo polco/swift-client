@@ -1,10 +1,8 @@
 import * as React from 'react';
+
 import Button from 'shared/components/Button';
 import SessionScanner from 'shared/components/SessionScanner';
-import TextField from 'shared/components/TextField';
 import { Context, contextTypes } from 'shared/context';
-
-import CreateSessionAction from 'shared/actions/CreateSession';
 
 import './JoinSession.less';
 
@@ -17,7 +15,6 @@ type State = {
 class JoinSession extends React.PureComponent<Props, State> {
 	public context!: Context;
 	public static contextTypes = contextTypes;
-	private userNameField: TextField | null = null;
 	private scanner: SessionScanner | null = null;
 	private input: HTMLInputElement | null = null;
 
@@ -29,8 +26,8 @@ class JoinSession extends React.PureComponent<Props, State> {
 		};
 	}
 
-	private onSessionScanned = (sessionId: string) => {
-		this.joinSession(sessionId);
+	private onSessionScanned = (userId: string) => {
+		this.join(userId);
 	}
 
 	private stopScanning = () => {
@@ -48,16 +45,11 @@ class JoinSession extends React.PureComponent<Props, State> {
 
 	private validateSession = () => {
 		const sessionId = this.input!.value;
-		this.joinSession(sessionId);
+		this.join(sessionId);
 	}
 
-	private joinSession(sessionId: string) {
-		this.context.store.executeAction(new CreateSessionAction(
-			sessionId,
-			'',
-			this.userNameField!.getValue()
-		));
-		this.context.RTCClient.joinSession(sessionId);
+	private join(userId: string) {
+		this.context.store.join(userId);
 	}
 
 	public render() {
@@ -66,13 +58,6 @@ class JoinSession extends React.PureComponent<Props, State> {
 		return (
 			<div className={ 'JoinSession' + (isScanning ? ' JoinSession_scanning' : '') }>
 				<div className='view__explanation'>Join an existing session by scanning its QR code or entering its ID.</div>
-				<div className='view__box'>
-					<TextField
-						label='choose a name to identify yourself'
-						placeholder='Albert'
-						ref={ ref => this.userNameField = ref }
-					/>
-				</div>
 				<div className='view__box'>
 					<div className='view__header'>Scan a QR Code</div>
 					<Button onTap={ this.startScanning } className='action-button'>Start Scanning</Button>

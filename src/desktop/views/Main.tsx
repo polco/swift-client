@@ -6,7 +6,6 @@ configureDevtool({
 });
 
 import { Context, contextTypes } from 'shared/context';
-import RTCClient from 'shared/RTCClient';
 import Store from 'shared/Store';
 
 import CreateSession from 'shared/views/CreateSession';
@@ -31,30 +30,18 @@ const ContentClasses: {[tabId in TabId]: React.ComponentClass} = {
 
 class Main extends React.PureComponent<Props, State> {
 	private store: Store;
-	private RTCClient: RTCClient;
 
 	constructor(props: Props, context: any) {
 		super(props, context);
 
 		this.store = new Store();
-		this.RTCClient = new RTCClient();
-		this.RTCClient.on('sessionOpened', this.onSessionOpened);
-		this.RTCClient.on('sessionJoined', this.onSessionJoined);
 		this.state = { tabId: 'create' };
-	}
-
-	private onSessionOpened = (sessionId: string) => {
-		//
-	}
-
-	private onSessionJoined = (sessionId: string) => {
-		//
 	}
 
 	public static childContextTypes = contextTypes;
 
 	public getChildContext(): Context {
-		return { RTCClient: this.RTCClient, store: this.store };
+		return { store: this.store };
 	}
 
 	private selectTab = (tabId: TabId) => {
