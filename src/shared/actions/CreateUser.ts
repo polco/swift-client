@@ -14,7 +14,9 @@ class CreateUser extends Action {
 	}
 
 	protected execute() {
-		const user = new User(this.id, this.name);
+		this.store.creating[this.id] = true;
+		const user = new User(this.store.userCRDT, this.id, this.name);
+		delete this.store.creating[this.id];
 		this.store.addDoc(user);
 		return true;
 	}

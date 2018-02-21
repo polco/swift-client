@@ -1,18 +1,18 @@
 import Action from './Action';
 
 class AddSessionUser extends Action {
-	private id: string;
+	private sessionId: string;
 	private userId: string;
 
-	constructor(id: string, userId: string) {
+	constructor(sessionId: string, userId: string) {
 		super('addSessionUser');
 
-		this.id = id;
+		this.sessionId = sessionId;
 		this.userId = userId;
 	}
 
 	protected execute() {
-		const session = this.store.getSession(this.id);
+		const session = this.store.getSession(this.sessionId);
 		session.userIds.push(this.userId);
 		return true;
 	}

@@ -1,5 +1,8 @@
 import * as debug from 'debug-logger';
 import { EventEmitter } from 'events';
+
+import { DocChange } from 'shared/Store';
+
 import GatewayClient from 'shared/GatewayClient';
 const log = debug('swift:RTCClient');
 
@@ -9,7 +12,26 @@ type Message =
 	{ type: 'answer', sessionDescription: RTCSessionDescriptionInit } |
 	{ type: 'candidate', candidate: RTCIceCandidateInit };
 
-class RTCClient extends EventEmitter {
+export type RTCEvent = {
+	'connect': RTCDataChannel,
+	'get-docs': string[],
+	'docs': any[],
+	'doc-changes': { sessionId: string, changes: {[docId: string]: DocChange[]} },
+};
+
+abstract class ICustomEmitter extends EventEmitter {
+	public on<K extends keyof RTCEvent>(type: K, cb: (value: RTCEvent[K]) => void): this {
+		EventEmitter.prototype.on.call(this, type, cb);
+		return this;
+	}
+
+	public emit<K extends keyof RTCEvent>(type: K, value: RTCEvent[K]): boolean {
+		return EventEmitter.prototype.emit.call(this, type, value);
+	}
+}
+
+// tslint:disable:max-classes-per-file
+class RTCClient extends ICustomEmitter {
 	private pc: RTCPeerConnection;
 	private gatewayClient: GatewayClient;
 	private sendChannel: RTCDataChannel | null = null;
@@ -88,10 +110,10 @@ class RTCClient extends EventEmitter {
 			this.emit(type, data);
 		};
 		this.gatewayClient.removeListener('data', this.onGatewayMessage);
-		this.emit('connect');
+		this.emit('connect', this.sendChannel!);
 	}
 
-	public sendMessage(type: string, data: any) {
+	public sendMessage<K extends keyof RTCEvent>(type: K, data: RTCEvent[K]): void {
 		if (this.sendChannel) {
 			this.sendChannel.send(JSON.stringify({ type, data }));
 		} else {
