@@ -16,7 +16,9 @@ class CreateSession extends Action {
 	}
 
 	protected execute() {
-		const session = new Session(this.id, this.name, this.ownerId);
+		this.store.creating[this.id] = true;
+		const session = new Session(this.store.userCRDT, this.id, this.name, this.ownerId);
+		delete this.store.creating[this.id];
 		this.store.sessionList.push(this.id);
 		this.store.addDoc(session);
 		return true;
