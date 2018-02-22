@@ -33,12 +33,16 @@ declare module 'crdt' {
 		public on(event: 'removed', cb: () => void): void;
 	}
 
-	export class Set {
-
+	export class Set<R extends any = any> {
+		public on(event: 'add' | 'remove', cb: (row: Row<R>) => void): void;
 	}
 
-	export class Seq {
-
+	export class Seq<R extends any = any> extends Set<R> {
+		public on(event: 'add' | 'remove' | 'move', cb: (row: Row<R>) => void): void;
+		public asArray(): Array<Row<R>>;
+		public forEach(cb: (row: Row<R>) => void): void;
+		public has(rowIndo: string | Row<R>): boolean;
+		public indexOf(rowIndo: string | Row<R>): number;
 	}
 
 	export class Doc<R extends object = any> {
@@ -50,7 +54,7 @@ declare module 'crdt' {
 		public toJSON(): JSON;
 		public createSet(key: string, value: string): Set;
 		public createSet(filter: (row: Row<R>) => boolean): Set;
-		public createSeq(key: string, value: string): Seq;
+		public createSeq<R extends any, T extends keyof R>(key: T, value: R[T]): Seq<R>;
 		public createSeq(filter: (row: Row<R>) => boolean): Seq;
 
 		public on(event: 'update', cb: (update: any, source: any) => void): void;

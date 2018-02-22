@@ -3,7 +3,7 @@ import Store from 'shared/Store';
 
 export type ActionsType =
 	'createSession' | 'updateSessionName' | 'addSessionUser' |
-	'updateUserName' | 'addSession' | 'createDoc';
+	'updateUserName' | 'addSession' | 'createDoc' | 'addItem' | 'removeItem';
 
 abstract class IAction {
 	public type: ActionsType;
