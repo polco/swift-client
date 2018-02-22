@@ -9,6 +9,7 @@ import GatewayClient from 'shared/GatewayClient';
 import Action from 'shared/actions/Action';
 import AddSessionUser from 'shared/actions/AddSessionUser';
 import CreateDoc from 'shared/actions/CreateDoc';
+import UpdateDoc from 'shared/actions/UpdateDoc';
 import UpdateSessionName from 'shared/actions/UpdateSessionName';
 import UpdateUserName from 'shared/actions/UpdateUserName';
 
@@ -36,7 +37,9 @@ class Store {
 	private RTCClients: { [userId: string]: RTCClient } = {};
 
 	public crdts: {[sessionId: string]: CRDTDoc<ISession | IUser>} = {};
-	public creating: {[id: string]: true} = {};
+	public updating: {[id: string]: true} = {};
+
+	public pendingSeqActions: Array<() => void> = [];
 
 	constructor() {
 		(window as any).store = this;
@@ -51,6 +54,13 @@ class Store {
 		this.gatewayClient = new GatewayClient(this.userId);
 		this.gatewayClient.on('join', this.onJoin);
 		this.gatewayClient.on('sessionUser', this.onSessionUser);
+	}
+
+	public applyPendingSeqAction() {
+		if (this.pendingSeqActions.length) {
+			this.pendingSeqActions.forEach(action => action());
+			this.pendingSeqActions = [];
+		}
 	}
 
 	public getDoc(docId: string): Doc {
@@ -91,18 +101,18 @@ class Store {
 		const crdt = this.crdts[sessionId] = new CRDTDoc();
 
 		// TODO: how do we deal with the same user in different CRDTDOC ?
-		this.creating[this.userId] = true;
+		this.updating[this.userId] = true;
 		const user = new User(this, crdt, this.userId, 'user');
 		this.addDoc(user);
-		delete this.creating[this.userId];
+		delete this.updating[this.userId];
 
-		crdt.on('update', (update, source) => {
-			console.log('userCRDT update', update, source);  // tslint:disable-line
-		});
-
-		crdt.on('create', (row) => {
+		crdt.on('row_update', (row) => {
 			const id = row.get('id');
-			if (!this.docs[id] && !this.creating[id]) {
+			if (this.updating[id]) { return; }
+
+			if (this.docs[id]) {
+				this.executeAction(new UpdateDoc(id, this.docs[id].changes));
+			} else {
 				this.executeAction(new CreateDoc(row.toJSON(), sessionId));
 			}
 		});

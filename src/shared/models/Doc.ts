@@ -43,11 +43,13 @@ abstract class Doc<M extends IDoc = any> {
 	@linked public readonly type: DocType;
 	public row!: CrdtDow<M>;
 	protected store: Store;
+	public changes: {[K in keyof M]?: M[K]};
 
 	constructor(store: Store, id: string, type: DocType) {
 		this.store = store;
 		this.id = id;
 		this.type = type;
+		this.changes = {};
 	}
 
 	protected initCRDT(crdt: CrdtDoc): void {
@@ -57,9 +59,7 @@ abstract class Doc<M extends IDoc = any> {
 		}
 
 		this.row.on('change', (changed) => {
-			for (const key in changed) {
-				(this as any)[key] = changed[key];
-			}
+			Object.assign(this.changes, changed);
 		});
 	}
 

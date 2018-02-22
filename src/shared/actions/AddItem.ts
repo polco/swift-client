@@ -16,10 +16,10 @@ class AddItem extends Action {
 	}
 
 	protected execute() {
-		if (!this.store.getItem(this.item.id) && !this.store.creating[this.item.id]) {
-			this.store.creating[this.item.id] = true;
+		if (!this.store.getItem(this.item.id) && !this.store.updating[this.item.id]) {
+			this.store.updating[this.item.id] = true;
 			const doc = Item.instantiate(this.store, this.store.crdts[this.sessionId], this.item);
-			delete this.store.creating[this.item.id];
+			delete this.store.updating[this.item.id];
 			this.store.addDoc(doc);
 		}
 
