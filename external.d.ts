@@ -25,7 +25,7 @@ declare module 'crdt' {
 		public get<K extends keyof R>(key: K): R[K];
 		public set<K extends keyof R>(key: K, value: R[K]): void;
 		public set(row: R): void;
-		public toJSON(): JSON;
+		public toJSON(): R;
 
 		public on(event: 'change', cb: (changed: Changed<R>) => void): void;
 		public on(event: 'changes', cb: (changes: any, changed: Changed<R>) => void): void;

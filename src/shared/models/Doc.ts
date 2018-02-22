@@ -66,7 +66,6 @@ abstract class Doc<M extends IDoc = any> {
 	}
 
 	public abstract toModel(): M;
-	public abstract merge(obj: any): void;
 	public abstract belongToSessions(store: Store): string[];
 }
 

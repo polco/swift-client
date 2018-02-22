@@ -113,6 +113,8 @@ class RTCClient extends ICustomEmitter {
 		this.emit('connect', this.sendChannel!);
 	}
 
+	public getDataChannel() { return this.sendChannel; }
+
 	public sendMessage<K extends keyof RTCEvent>(type: K, data: RTCEvent[K]): void {
 		if (this.sendChannel) {
 			this.sendChannel.send(JSON.stringify({ type, data }));

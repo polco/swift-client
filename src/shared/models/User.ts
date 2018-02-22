@@ -15,14 +15,8 @@ class User extends Doc<IUser> {
 		this.initCRDT(crdt);
 	}
 
-	// public static instantiate(crdt: CrdtDoc, { id, name }: { id: string, name: string }): User {
-	// 	return new User(crdt, id, name);
-	// }
-
-	public merge(obj: any) {
-		if (this.name !== obj.name) {
-			this.name = obj.name;
-		}
+	public static instantiate(crdt: CrdtDoc<IDoc>, { id, name }: { id: string, name: string }): User {
+		return new User(crdt, id, name);
 	}
 
 	public toModel() {

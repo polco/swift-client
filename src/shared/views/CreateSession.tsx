@@ -22,7 +22,7 @@ class CreateSession extends React.PureComponent<Props> {
 		store.executeAction(new CreateSessionAction(
 			sessionId,
 			this.sessionNameField!.getValue(),
-			store.user.id
+			store.userId
 		));
 		store.openSession(sessionId);
 	}
