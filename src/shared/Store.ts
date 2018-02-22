@@ -13,8 +13,10 @@ import UpdateSessionName from 'shared/actions/UpdateSessionName';
 import UpdateUserName from 'shared/actions/UpdateUserName';
 
 import Doc from 'shared/models/Doc';
+import Item from 'shared/models/Item';
 import Session, { ISession } from 'shared/models/Session';
 import User, { IUser } from 'shared/models/User';
+
 import RTCClient from 'shared/RTCClient';
 
 const log = debug('swift:RTCClient');
@@ -90,7 +92,7 @@ class Store {
 
 		// TODO: how do we deal with the same user in different CRDTDOC ?
 		this.creating[this.userId] = true;
-		const user = new User(crdt, this.userId, 'user');
+		const user = new User(this, crdt, this.userId, 'user');
 		this.addDoc(user);
 		delete this.creating[this.userId];
 
@@ -101,7 +103,7 @@ class Store {
 		crdt.on('create', (row) => {
 			const id = row.get('id');
 			if (!this.docs[id] && !this.creating[id]) {
-				this.executeAction(new CreateDoc(row, sessionId));
+				this.executeAction(new CreateDoc(row.toJSON(), sessionId));
 			}
 		});
 	}
@@ -152,6 +154,10 @@ class Store {
 
 	public getUser(userId: string): User {
 		return this.docs[userId] as User;
+	}
+
+	public getItem(itemId: string): Item {
+		return this.docs[itemId] as Item;
 	}
 
 	public executeAction<A extends Action>(action: A, sideEffect = false): A {

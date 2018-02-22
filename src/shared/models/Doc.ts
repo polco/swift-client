@@ -4,7 +4,7 @@ import Store from 'shared/Store';
 
 import { Doc as CrdtDoc, Row as CrdtDow } from 'crdt';
 
-export type DocType = 'session' | 'user';
+export type DocType = 'session' | 'user' | 'item';
 
 export function linked(docPrototype: any, property: string) {
 	const atom = new Atom(property);
@@ -42,8 +42,10 @@ abstract class Doc<M extends IDoc = any> {
 	@linked public readonly id: string;
 	@linked public readonly type: DocType;
 	public row!: CrdtDow<M>;
+	protected store: Store;
 
-	constructor(id: string, type: DocType) {
+	constructor(store: Store, id: string, type: DocType) {
+		this.store = store;
 		this.id = id;
 		this.type = type;
 	}
@@ -66,7 +68,6 @@ abstract class Doc<M extends IDoc = any> {
 	}
 
 	public abstract toModel(): M;
-	public abstract belongToSessions(store: Store): string[];
 }
 
 export default Doc;
