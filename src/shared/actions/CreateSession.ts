@@ -19,9 +19,9 @@ class CreateSession extends Action {
 		if (!this.store.crdts[this.id]) {
 			this.store.createCRDT(this.id);
 		}
-		this.store.creating[this.id] = true;
+		this.store.updating[this.id] = true;
 		const session = new Session(this.store, this.store.crdts[this.id], this.id, this.name, this.ownerId, [this.ownerId]);
-		delete this.store.creating[this.id];
+		delete this.store.updating[this.id];
 		this.store.sessionList.push(this.id);
 		this.store.addDoc(session);
 		return true;
