@@ -1,0 +1,4 @@
+{
+	"*.{ts,tsx}": "tslint -t stylish",
+	"*.less": "stylelint",
+}
