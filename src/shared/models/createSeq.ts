@@ -7,6 +7,8 @@ export default function createSeq<D extends IDoc, K extends keyof D, L>(
 ) {
 	const seq = crdt.createSeq(key, value);
 
+	seq.forEach(row => list.push(rowToValue(row)));
+
 	seq.on('add', row => {
 		const index = seq.indexOf(row);
 		if (index !== -1) {

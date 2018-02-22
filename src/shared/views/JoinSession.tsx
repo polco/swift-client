@@ -6,7 +6,9 @@ import { Context, contextTypes } from 'shared/context';
 
 import './JoinSession.less';
 
-type Props = {};
+export type Props = {
+	navigateToSession(sessionId: string): void
+};
 
 type State = {
 	isScanning: boolean
@@ -26,8 +28,9 @@ class JoinSession extends React.PureComponent<Props, State> {
 		};
 	}
 
-	private onSessionScanned = (userId: string) => {
-		this.join(userId);
+	private onSessionScanned = (sessionId: string) => {
+		this.setState({ isScanning: false });
+		this.join(sessionId);
 	}
 
 	private stopScanning = () => {
@@ -48,8 +51,9 @@ class JoinSession extends React.PureComponent<Props, State> {
 		this.join(sessionId);
 	}
 
-	private join(userId: string) {
-		this.context.store.join(userId);
+	private join(sessionId: string) {
+		this.context.store.join(sessionId);
+		this.props.navigateToSession(sessionId);
 	}
 
 	public render() {

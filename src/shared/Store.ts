@@ -7,7 +7,6 @@ import * as uuid from 'uuid/v4';
 import GatewayClient from 'shared/GatewayClient';
 
 import Action from 'shared/actions/Action';
-import AddSessionUser from 'shared/actions/AddSessionUser';
 import CreateDoc from 'shared/actions/CreateDoc';
 import UpdateDoc from 'shared/actions/UpdateDoc';
 import UpdateSessionName from 'shared/actions/UpdateSessionName';
@@ -80,7 +79,6 @@ class Store {
 		client.on('connect', (dc) => {
 			const stream = dcstream(dc);
 			stream.pipe(this.crdts[sessionId].createStream()).pipe(stream);
-			this.executeAction(new AddSessionUser(sessionId, userId));
 		});
 	}
 
@@ -109,12 +107,15 @@ class Store {
 		crdt.on('row_update', (row) => {
 			const id = row.get('id');
 			if (this.updating[id]) { return; }
+			this.updating[id] = true;
 
 			if (this.docs[id]) {
 				this.executeAction(new UpdateDoc(id, this.docs[id].changes));
 			} else {
 				this.executeAction(new CreateDoc(row.toJSON(), sessionId));
 			}
+
+			delete this.updating[id];
 		});
 	}
 
@@ -149,7 +150,7 @@ class Store {
 	}
 
 	public join(sessionId: string) {
-		this.gatewayClient.joinSession(sessionId);
+		return this.gatewayClient.joinSession(sessionId);
 	}
 
 	public getSession(sessionId: string): Session {

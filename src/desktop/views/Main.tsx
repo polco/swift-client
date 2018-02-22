@@ -22,7 +22,7 @@ type State = {
 	tabId: TabId
 };
 
-const ContentClasses: {[tabId in TabId]: React.ComponentClass} = {
+const ContentClasses: {[tabId in TabId]: React.ComponentClass<{ navigateToSession(sessionId: string): void }>} = {
 	sessions: Sessions,
 	create: CreateSession,
 	join: JoinSession
@@ -48,6 +48,12 @@ class Main extends React.PureComponent<Props, State> {
 		this.setState({ tabId });
 	}
 
+	private navigateToSession = (sessionId: string) => {
+		if (this.state.tabId !== 'sessions') {
+			this.setState({ tabId: 'sessions' });
+		}
+	}
+
 	public render() {
 		const currentTabId = this.state.tabId;
 		const ContentClass = ContentClasses[currentTabId];
@@ -59,7 +65,7 @@ class Main extends React.PureComponent<Props, State> {
 					currentTabId={ currentTabId }
 					onTabSelect={ this.selectTab }
 				/>
-				<div className='Main__tab-container'><ContentClass /></div>
+				<div className='Main__tab-container'><ContentClass navigateToSession={ this.navigateToSession } /></div>
 				{ __IS_DEV__ &&  <DevTools /> }
 			</div>
 		);

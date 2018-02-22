@@ -4,8 +4,12 @@ import * as React from 'react';
 import SessionItem from 'shared/components/SessionItem';
 import { Context, contextTypes } from 'shared/context';
 
+export type Props = {
+	navigateToSession(sessionId: string): void
+};
+
 @observer
-class Sessions extends React.Component {
+class Sessions extends React.Component<Props> {
 	public context!: Context;
 	public static contextTypes = contextTypes;
 
