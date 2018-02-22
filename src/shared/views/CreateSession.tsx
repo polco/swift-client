@@ -9,7 +9,9 @@ import { Context, contextTypes } from 'shared/context';
 
 import './CreateSession.less';
 
-export type Props = {};
+export type Props = {
+	navigateToSession(sessionId: string): void
+};
 
 class CreateSession extends React.PureComponent<Props> {
 	public context!: Context;
@@ -25,6 +27,7 @@ class CreateSession extends React.PureComponent<Props> {
 			store.userId
 		));
 		store.openSession(sessionId);
+		this.props.navigateToSession(sessionId);
 	}
 
 	public render() {

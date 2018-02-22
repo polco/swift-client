@@ -16,9 +16,7 @@ class CreateDoc<D extends IDoc> extends Action {
 	}
 
 	protected execute() {
-		this.store.updating[this.row.id] = true;
 		const doc = docClass[this.row.type].instantiate(this.store, this.store.crdts[this.sessionId], this.row);
-		delete this.store.updating[this.row.id];
 		this.store.addDoc(doc);
 
 		if (doc instanceof Session && !this.store.sessionList.includes(this.row.id)) {
