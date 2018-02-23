@@ -42,14 +42,16 @@ class SessionItem extends React.Component<Props, State> {
 		const value = this.input!.value;
 		if (value === '') { return; }
 
+		const sessionId = this.props.sessionId;
+
 		const itemId = 'item-' + uuid();
 		this.context.store.executeAction(new CreateDoc<IItem>({
 			id: itemId,
 			type: 'item',
-			creatorId: this.context.store.userId,
+			creatorId: this.context.store.userIdPerSessionId[sessionId],
 			creationDate: new Date().toISOString(),
 			itemContent: { type: 'text', content: value }
-		}, this.props.sessionId));
+		}, sessionId));
 		this.input!.value = '';
 	}
 

@@ -6,25 +6,26 @@ const log = debug('swift:GatewayClient');
 class GatewayClient extends EventEmitter {
 	private socket: SocketIOClient.Socket;
 	private isConnecting = false;
+	// private socketIdPerUserId: {[userId: string]: string} = {};
 
-	constructor(userId: string) {
+	constructor() {
 		super();
-		this.socket = SocketIO(__SOCKET_END_POINT__, { transports: ['websocket'], autoConnect: false, query: { userId } });
+		this.socket = SocketIO(__SOCKET_END_POINT__, { transports: ['websocket'], autoConnect: false });
 
-		this.socket.on('data', (fromId: string, data: any) => {
+		this.socket.on('data', (clientId: string, data: any) => {
 			log('received data', data);
-			this.emit('data', fromId, data);
+			this.emit('data', clientId, data);
 		});
 		this.socket.on('error', (error: any) => log(error));
 		this.socket.on('disconnect', () => {
 			log(`Disconnected from the gateway`);
 			this.emit('disconnected');
 		});
-		this.socket.on('join', (sessionId: string, remoteUserId: string) => {
-			this.emit('join', sessionId, remoteUserId);
+		this.socket.on('join', (sessionId: string, clientId: string) => {
+			this.emit('join', sessionId, clientId);
 		});
-		this.socket.on('sessionUser', (sessionId: string, remoteUserId: string) => {
-			this.emit('sessionUser', sessionId, remoteUserId);
+		this.socket.on('sessionClient', (sessionId: string, clientId: string) => {
+			this.emit('sessionClient', sessionId, clientId);
 		});
 	}
 
@@ -71,10 +72,10 @@ class GatewayClient extends EventEmitter {
 		this.socket.removeListener('connect_timeout');
 	}
 
-	public async send(remoteUserId: string, data: any) {
+	public async send(remoteClientId: string, data: any) {
 		if (!this.socket.connected) { await this.connect(); }
-		log('sending', data, 'to', remoteUserId);
-		this.socket.emit('data', remoteUserId, data);
+		log('sending', data, 'to', remoteClientId);
+		this.socket.emit('data', remoteClientId, data);
 	}
 }
 

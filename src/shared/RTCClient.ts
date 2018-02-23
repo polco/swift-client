@@ -35,16 +35,16 @@ class RTCClient extends ICustomEmitter {
 	private pc: RTCPeerConnection;
 	private gatewayClient: GatewayClient;
 	private sendChannel: RTCDataChannel | null = null;
-	private remoteUserId: string;
+	private remoteClientId: string;
 	public sessionCreating = false;
 	public sessionCreated = false;
 
-	constructor(remoteUserId: string, gatewayClient: GatewayClient) {
+	constructor(remoteClientId: string, gatewayClient: GatewayClient) {
 		super();
 
 		this.gatewayClient = gatewayClient;
 		this.gatewayClient.on('data', this.onGatewayMessage);
-		this.remoteUserId = remoteUserId;
+		this.remoteClientId = remoteClientId;
 
 		this.pc = new RTCPeerConnection({
 			iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
@@ -55,7 +55,7 @@ class RTCClient extends ICustomEmitter {
 
 	public async initiateConnection() {
 		log('initiateConnection');
-		this.sendChannel = this.pc.createDataChannel('Swift Data Channel with ' + this.remoteUserId);
+		this.sendChannel = this.pc.createDataChannel('Swift Data Channel with ' + this.remoteClientId);
 		this.sendChannel.onopen = this.onSendChannelOpen;
 		this.sendChannel.onclose = this.onSendChannelClose;
 		this.sendChannel.onerror = this.onSendChannelError;
@@ -64,16 +64,16 @@ class RTCClient extends ICustomEmitter {
 		const sessionDescription = await this.pc.createOffer() as any;
 		log('offer created');
 		await this.pc.setLocalDescription(sessionDescription);
-		this.gatewayClient.send(this.remoteUserId, { type: 'offer', sessionDescription });
+		this.gatewayClient.send(this.remoteClientId, { type: 'offer', sessionDescription });
 	}
 
-	public onGatewayMessage = async (fromUserId: string, msg: Message) => {
-		if (fromUserId !== this.remoteUserId) { return; }
+	public onGatewayMessage = async (fromClientId: string, msg: Message) => {
+		if (fromClientId !== this.remoteClientId) { return; }
 		if (msg.type === 'offer') {
 			this.pc.setRemoteDescription(new RTCSessionDescription(msg.sessionDescription));
 			const sessionDescription = await this.pc.createAnswer() as any;
 			this.pc.setLocalDescription(sessionDescription);
-			this.gatewayClient.send(this.remoteUserId, { type: 'answer', sessionDescription });
+			this.gatewayClient.send(this.remoteClientId, { type: 'answer', sessionDescription });
 		} else if (msg.type === 'answer') {
 			this.pc.setRemoteDescription(msg.sessionDescription);
 		} else if (msg.type === 'candidate') {
@@ -126,7 +126,7 @@ class RTCClient extends ICustomEmitter {
 	private onLocalIceCandidate = (e: RTCPeerConnectionIceEvent) => {
 		if (!e.candidate) { return; }
 
-		this.gatewayClient.send(this.remoteUserId, {
+		this.gatewayClient.send(this.remoteClientId, {
 			type: 'candidate',
 			candidate: {
 				sdpMLineIndex: e.candidate.sdpMLineIndex,

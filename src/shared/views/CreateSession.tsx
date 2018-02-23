@@ -21,12 +21,12 @@ class CreateSession extends React.PureComponent<Props> {
 	private createSession = () => {
 		const sessionId = 'session-' + uuid();
 		const store = this.context.store;
+		store.openSession(sessionId);
 		store.executeAction(new CreateSessionAction(
 			sessionId,
 			this.sessionNameField!.getValue(),
-			store.userId
+			store.userIdPerSessionId[sessionId]
 		));
-		store.openSession(sessionId);
 		this.props.navigateToSession(sessionId);
 	}
 

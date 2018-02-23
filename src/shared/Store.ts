@@ -9,8 +9,6 @@ import GatewayClient from 'shared/GatewayClient';
 import Action from 'shared/actions/Action';
 import CreateDoc from 'shared/actions/CreateDoc';
 import UpdateDoc from 'shared/actions/UpdateDoc';
-import UpdateSessionName from 'shared/actions/UpdateSessionName';
-import UpdateUserName from 'shared/actions/UpdateUserName';
 
 import Doc from 'shared/models/Doc';
 import Item from 'shared/models/Item';
@@ -31,28 +29,24 @@ export type DocChange = {
 class Store {
 	@observable public sessionList: string[] = [];
 	private docs: { [docId: string]: Doc } = {};
-	public userId = 'user-' + uuid();
+	// public userId = 'user-' + uuid();
+	public userName: string = 'user buehehe';
 	private gatewayClient: GatewayClient;
-	private RTCClients: { [userId: string]: RTCClient } = {};
+	private RTCClients: { [clientId: string]: RTCClient } = {};
 
 	public crdts: {[sessionId: string]: CRDTDoc<ISession | IUser>} = {};
 	public updating: {[id: string]: true} = {};
 
 	public pendingSeqActions: Array<() => void> = [];
 
+	public userIdPerSessionId: {[sessionId: string]: string} = {};
+
 	constructor() {
 		(window as any).store = this;
-		(window as any).udpateUser = (name: string) => {
-			this.executeAction(new UpdateUserName(this.userId, name));
-		};
-		(window as any).udpateSession = (name: string) => {
-			const sessionId = this.sessionList[0];
-			this.executeAction(new UpdateSessionName(sessionId, name));
-		};
 
-		this.gatewayClient = new GatewayClient(this.userId);
+		this.gatewayClient = new GatewayClient();
 		this.gatewayClient.on('join', this.onJoin);
-		this.gatewayClient.on('sessionUser', this.onSessionUser);
+		this.gatewayClient.on('sessionClient', this.onSessionUser);
 	}
 
 	public applyPendingSeqAction() {
@@ -70,11 +64,11 @@ class Store {
 		this.docs[doc.id] = doc;
 	}
 
-	private onJoin = (sessionId: string, userId: string) => {
+	private onJoin = (sessionId: string, clientId: string) => {
 		if (!this.crdts[sessionId]) { this.createCRDT(sessionId); }
 
-		if (this.RTCClients[userId]) { return; } // TODO Handle same user with many sessions
-		const client = this.RTCClients[userId] = new RTCClient(userId, this.gatewayClient);
+		if (this.RTCClients[clientId]) { return; } // TODO Handle same user with many sessions
+		const client = this.RTCClients[clientId] = new RTCClient(clientId, this.gatewayClient);
 		this.setupClient(client);
 		client.on('connect', (dc) => {
 			const stream = dcstream(dc);
@@ -82,11 +76,11 @@ class Store {
 		});
 	}
 
-	private onSessionUser = (sessionId: string, userId: string) => {
+	private onSessionUser = (sessionId: string, clientId: string) => {
 		if (!this.crdts[sessionId]) { this.createCRDT(sessionId); }
 
-		if (this.RTCClients[userId]) { return; } // TODO Handle same user with many sessions
-		const client = this.RTCClients[userId] = new RTCClient(userId, this.gatewayClient);
+		if (this.RTCClients[clientId]) { return; } // TODO Handle same user with many sessions
+		const client = this.RTCClients[clientId] = new RTCClient(clientId, this.gatewayClient);
 		this.setupClient(client);
 		client.initiateConnection();
 		client.on('connect', (dc) => {
@@ -99,10 +93,12 @@ class Store {
 		const crdt = this.crdts[sessionId] = new CRDTDoc();
 
 		// TODO: how do we deal with the same user in different CRDTDOC ?
-		this.updating[this.userId] = true;
-		const user = new User(this, crdt, this.userId, 'user');
+		const userId = 'user-' + uuid();
+		this.userIdPerSessionId[sessionId] = userId;
+		this.updating[userId] = true;
+		const user = new User(this, crdt, userId, 'user');
 		this.addDoc(user);
-		delete this.updating[this.userId];
+		delete this.updating[userId];
 
 		crdt.on('row_update', (row) => {
 			const id = row.get('id');
@@ -142,6 +138,7 @@ class Store {
 	}
 
 	public openSession(sessionId: string) {
+		this.createCRDT(sessionId);
 		this.gatewayClient.openSession(sessionId);
 	}
 
@@ -150,6 +147,7 @@ class Store {
 	}
 
 	public join(sessionId: string) {
+		this.createCRDT(sessionId);
 		return this.gatewayClient.joinSession(sessionId);
 	}
 
