@@ -1,6 +1,6 @@
 import { Doc as CRDTDoc } from 'crdt';
 import * as debug from 'debug-logger';
-import { IObjectChange, observable } from 'mobx';
+import { IObjectChange, observable, observe } from 'mobx';
 import * as dcstream from 'rtc-dcstream';
 import * as uuid from 'uuid/v4';
 
@@ -148,7 +148,16 @@ class Store {
 
 	public join(sessionId: string) {
 		this.createCRDT(sessionId);
-		return this.gatewayClient.joinSession(sessionId);
+		this.gatewayClient.joinSession(sessionId);
+		return new Promise((resolve) => {
+			// TODO handle error and reject ?
+			const dispose = observe(this.sessionList, () => {
+				if (this.sessionList.includes(sessionId)) {
+					dispose();
+					resolve();
+				}
+			});
+		});
 	}
 
 	public getSession(sessionId: string): Session {

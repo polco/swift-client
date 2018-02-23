@@ -6,25 +6,25 @@ import CreateSessionAction from 'shared/actions/CreateSession';
 import Button from 'shared/components/Button';
 import TextField from 'shared/components/TextField';
 import { Context, contextTypes } from 'shared/context';
+import { TabComponentProps } from 'shared/views/tabs';
 
 import './CreateSession.less';
 
-export type Props = {
-	navigateToSession(sessionId: string): void
-};
-
-class CreateSession extends React.PureComponent<Props> {
+class CreateSession extends React.PureComponent<TabComponentProps> {
 	public context!: Context;
 	public static contextTypes = contextTypes;
 	private sessionNameField!: TextField | null;
 
 	private createSession = () => {
+		const value = this.sessionNameField!.getValue();
+		if (value === '') { return; }
+
 		const sessionId = 'session-' + uuid();
 		const store = this.context.store;
 		store.openSession(sessionId);
 		store.executeAction(new CreateSessionAction(
 			sessionId,
-			this.sessionNameField!.getValue(),
+			value,
 			store.userIdPerSessionId[sessionId]
 		));
 		this.props.navigateToSession(sessionId);
@@ -34,7 +34,7 @@ class CreateSession extends React.PureComponent<Props> {
 		return (
 			<div className='CreateSession'>
 				<div className='view__explanation'>Create a session to allow another device to connect.</div>
-				<div className='view__box'>
+				<form className='view__box' onSubmit={ this.createSession }>
 					<div className='view__column'>
 						<TextField
 							label='choose a name for your session'
@@ -47,7 +47,7 @@ class CreateSession extends React.PureComponent<Props> {
 							Create
 						</Button>
 					</div>
-				</div>
+				</form>
 			</div>
 		);
 	}

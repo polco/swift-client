@@ -3,24 +3,21 @@ import * as React from 'react';
 import Button from 'shared/components/Button';
 import SessionScanner from 'shared/components/SessionScanner';
 import { Context, contextTypes } from 'shared/context';
+import { TabComponentProps } from 'shared/views/tabs';
 
 import './JoinSession.less';
-
-export type Props = {
-	navigateToSession(sessionId: string): void
-};
 
 type State = {
 	isScanning: boolean
 };
 
-class JoinSession extends React.PureComponent<Props, State> {
+class JoinSession extends React.PureComponent<TabComponentProps, State> {
 	public context!: Context;
 	public static contextTypes = contextTypes;
 	private scanner: SessionScanner | null = null;
 	private input: HTMLInputElement | null = null;
 
-	constructor(props: Props, context: Context) {
+	constructor(props: TabComponentProps, context: Context) {
 		super(props, context);
 
 		this.state = {
@@ -48,12 +45,14 @@ class JoinSession extends React.PureComponent<Props, State> {
 
 	private validateSession = () => {
 		const sessionId = this.input!.value;
+		if (!sessionId) { return; }
 		this.join(sessionId);
 	}
 
 	private join(sessionId: string) {
-		this.context.store.join(sessionId);
-		this.props.navigateToSession(sessionId);
+		this.context.store.join(sessionId).then(() => {
+			this.props.navigateToSession(sessionId);
+		});
 	}
 
 	public render() {
@@ -70,11 +69,11 @@ class JoinSession extends React.PureComponent<Props, State> {
 						<Button onTap={ this.stopScanning } className='action-button JoinSession__StopScanning'>Stop Scanning</Button>
 					</div>
 				</div>
-				<div className='view__box'>
+				<form className='view__box' onSubmit={ this.validateSession }>
 					<div className='view__header'>Enter a session ID</div>
 					<input className='JoinSession__id-input' ref={ ref => this.input = ref } />
 					<Button onTap={ this.validateSession } className='action-button'>Join</Button>
-				</div>
+				</form>
 			</div>
 		);
 	}
