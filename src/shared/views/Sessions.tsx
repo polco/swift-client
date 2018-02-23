@@ -3,18 +3,15 @@ import * as React from 'react';
 
 import SessionItem from 'shared/components/SessionItem';
 import { Context, contextTypes } from 'shared/context';
-
-export type Props = {
-	navigateToSession(sessionId: string): void
-};
+import { TabComponentProps } from 'shared/views/tabs';
 
 @observer
-class Sessions extends React.Component<Props> {
+class Sessions extends React.Component<TabComponentProps> {
 	public context!: Context;
 	public static contextTypes = contextTypes;
 
 	private onEnterSession = (sessionId: string) => {
-		//
+		this.props.navigateToSession(sessionId);
 	}
 
 	public render() {
