@@ -1,4 +1,3 @@
-import { Lambda, observe } from 'mobx';
 import DevTools, { configureDevtool } from 'mobx-react-devtools';
 import * as React from 'react';
 
@@ -13,17 +12,18 @@ import CreateSession from 'shared/views/CreateSession';
 import JoinSession from 'shared/views/JoinSession';
 import Sessions from 'shared/views/Sessions';
 import SessionViewer from 'shared/views/SessionViewer';
-import { TabComponentProps, TabId, TabsInfo } from 'shared/views/tabs';
+import { TabComponentProps, TabId } from 'shared/views/tabs';
 
-import Tabs, { LabelProps } from 'shared/components/Tabs';
+import { TabsInfo } from './tabs';
+
+import Sidebar from 'desktop/components/Sidebar';
+import Tabs from 'shared/components/Tabs';
 
 import './Main.less';
 
 export type Props = {};
 type State = {
-	tabId: TabId | 'session',
-	tabs: Array<Array<{ tabId: string, Label: React.StatelessComponent<LabelProps> }>>,
-	category: number,
+	tabId: TabId,
 	sessionId: string | null
 };
 
@@ -35,70 +35,58 @@ const ContentClasses: {[tabId in TabId]: React.ComponentClass<TabComponentProps>
 
 class Main extends React.PureComponent<Props, State> {
 	private store: Store;
-	private sessionsObserverDispose: Lambda;
 	public static childContextTypes = contextTypes;
 
 	constructor(props: Props, context: any) {
 		super(props, context);
 
 		this.store = new Store();
-		this.state = { tabId: 'sessions', tabs: [[], TabsInfo], category: 1, sessionId: null };
-
-		this.sessionsObserverDispose = observe(this.store.sessionList, () => {
-			this.setState({
-				tabs: [
-					this.store.sessionList.map(sessionId => {
-						const session = this.store.getSession(sessionId);
-						return { tabId: sessionId, Label: () => session.name as any };
-					}),
-					TabsInfo
-				]
-			});
-		});
-	}
-
-	public componentWillUnmount() {
-		this.sessionsObserverDispose();
+		this.state = { tabId: 'sessions', sessionId: null };
 	}
 
 	public getChildContext(): Context {
 		return { store: this.store };
 	}
 
-	private selectTab = (tabId: TabId | string) => {
-		if (this.state.category === 0) {
-			this.setState({ tabId: 'session', sessionId: tabId });
-		} else {
-			this.setState({ tabId: tabId as TabId });
-		}
+	private selectTab = (tabId: TabId) => {
+		this.setState({ tabId, sessionId: null });
 	}
 
 	private navigateToSession = (sessionId: string) => {
-		this.setState({ tabId: 'session', category: 0, sessionId });
+		this.setState({ tabId: 'sessions', sessionId });
 	}
 
 	private navigateToTab = (tabId: TabId) => {
-		this.setState({ tabId, category: 1 });
+		this.setState({ tabId, sessionId: null });
 	}
 
 	public render() {
-		const { tabs, tabId, category, sessionId } = this.state;
-		const ContentClass = tabId === 'session' ? SessionViewer : ContentClasses[tabId];
+		const { tabId, sessionId } = this.state;
+		const ContentClass = sessionId ? SessionViewer : ContentClasses[tabId];
 
 		return (
 			<div className='Main'>
-				<Tabs
-					tabs={ tabs }
-					categoryIndex={ category }
-					currentTabId={ tabId === 'session' && sessionId ? sessionId : tabId }
-					onTabSelect={ this.selectTab }
-				/>
-				<div className='Main__tab-container'>
-					<ContentClass
-						navigateToSession={ this.navigateToSession }
-						navigateToTab={ this.navigateToTab }
-						sessionId={ sessionId }
+				<div className='Main__header'>
+					<div className='Main__title'>
+						Swift
+					</div>
+					<Tabs
+						tabs={ TabsInfo }
+						categoryIndex={ 0 }
+						currentTabId={ tabId }
+						onTabSelect={ this.selectTab }
+						hideIndicator={ !!sessionId }
 					/>
+				</div>
+				<div className='Main__body'>
+					<Sidebar selectSession={ this.navigateToSession } sessionId={ sessionId } />
+					<div className='Main__tab-container'>
+						<ContentClass
+							navigateToSession={ this.navigateToSession }
+							navigateToTab={ this.navigateToTab }
+							sessionId={ sessionId }
+						/>
+					</div>
 				</div>
 				{ __IS_DEV__ &&  <DevTools /> }
 			</div>

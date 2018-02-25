@@ -33,18 +33,16 @@
 		height: 3px;
 		background-color: rgb(231, 66, 66);
 		transform-origin: 0 0;
-		transition: transform 200ms ease-out;
+		transition: transform 200ms ease-out, opacity 100ms linear;
+
+		&_hidden {
+			opacity: 0;
+		}
 	}
 
 	&__tab {
 		transition: background-color 150ms linear;
 		white-space: nowrap;
-	}
-}
-
-.desktop .Tabs {
-	&__tab {
-		padding: 20px 40px;
 		font-size: 14px;
 		font-weight: 600;
 
@@ -54,14 +52,21 @@
 	}
 }
 
-.mobile .Tabs {
+.desktop .Tabs {
 	&__tab {
-		padding: 20px 10px;
-		font-size: 14px;
-		font-weight: 600;
+		padding: 20px 40px;
+	}
+}
 
-		&:active {
-			background-color: rgba(200, 200, 200, 0.1);
-		}
+.mobile .Tabs {
+	&__category_container {
+		flex: 1 0 0;
+	}
+
+	&__tab {
+		flex: 1 0 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 }

@@ -1,14 +1,7 @@
 import { observer } from 'mobx-react';
 
 import { Context, contextTypes } from 'shared/context';
-
-export type TabId = 'sessions' | 'create' | 'join';
-
-export type TabComponentProps = {
-	navigateToTab(tabId: TabId): void,
-	navigateToSession(sessionId: string): void,
-	sessionId: string | null
-};
+import { TabId } from 'shared/views/tabs';
 
 import { LabelProps } from 'shared/components/Tabs';
 
@@ -18,15 +11,15 @@ const SessionsLabel: React.StatelessComponent<LabelProps> = observer(function (
 ) {
 	props.onUpdate();
 	const sessions = this.context.store.sessionList;
-	return ('My sessions' + (sessions.length ? ` (${sessions.length})` : '' )) as any;
+	return ('Sessions' + (sessions.length ? ` (${sessions.length})` : '' )) as any;
 });
 SessionsLabel.contextTypes = contextTypes;
 
 export const TabMap: {[tabId in TabId]: React.StatelessComponent<LabelProps>}  = {
 	sessions: SessionsLabel,
-	create: () => 'Create Session' as any,
-	join: () => 'Join Session' as any
+	create: () => 'Create' as any,
+	join: () => 'Join' as any
 };
 
-export const TabOrder: TabId[] = ['sessions', 'create', 'join'];
-export const TabsInfo = TabOrder.map(tabId => ({ tabId, Label: TabMap[tabId] }));
+const order: TabId[] = ['sessions', 'create', 'join'];
+export const TabsInfo = order.map(tabId => ({ tabId, Label: TabMap[tabId] }));
