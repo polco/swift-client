@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react';
+import * as QRCode from 'qrcode.react';
 import * as React from 'react';
 import * as uuid from 'uuid/v4';
 
@@ -41,6 +42,11 @@ class SessionViewer extends React.Component<TabComponentProps> {
 		this.input!.value = '';
 	}
 
+	private validateAddText = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		this.addText();
+	}
+
 	private goBack = () => {
 		this.props.navigateToTab('sessions');
 	}
@@ -60,30 +66,25 @@ class SessionViewer extends React.Component<TabComponentProps> {
 				{
 					session && (
 						<React.Fragment>
-							<div className='SessionItem__user-list'>
-							{
-								session.userIds.map(userId =>
-									<div className='SessionItem__user' key={ userId }>
-										{ store.getUser(userId).name }
-									</div>
-								)
-							}
+							<div className='SessionViewer__info'>
+								<div className='user-select'>{ session.id }</div>
+								<QRCode value={ session.id } size={ 256 } />
 							</div>
 
-							<div className='SessionItem__item-list'>
+							<div className='SessionViewer__item-list'>
 							{
 								session.itemIds.map(itemId =>
-									<div className='SessionItem__item' key={ itemId }>
+									<div className='SessionViewer__item' key={ itemId }>
 										{ store.getItem(itemId).itemContent.content }
 									</div>
 								)
 							}
 							</div>
 
-							<div className='SessionItem_add-text'>
-								<input className='SessionItem_text-input' ref={ ref => this.input = ref } />
+							<form className='SessionViewer__add-text' onSubmit={ this.validateAddText }>
+								<input className='SessionViewer__text-input' ref={ ref => this.input = ref } />
 								<Button onTap={ this.addText }>Send text</Button>
-							</div>
+							</form>
 						</React.Fragment>
 					)
 				}

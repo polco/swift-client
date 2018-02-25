@@ -14,6 +14,7 @@ class UpdateUserName extends Action {
 			const user = this.store.getUser(userId);
 			user.name = this.name;
 		}
+		this.store.userName = this.name;
 		return true;
 	}
 }

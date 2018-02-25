@@ -55,6 +55,11 @@ class JoinSession extends React.PureComponent<TabComponentProps, State> {
 		});
 	}
 
+	private formValidate = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		this.validateSession();
+	}
+
 	public render() {
 		const { isScanning } = this.state;
 
@@ -69,7 +74,7 @@ class JoinSession extends React.PureComponent<TabComponentProps, State> {
 						<Button onTap={ this.stopScanning } className='action-button JoinSession__StopScanning'>Stop Scanning</Button>
 					</div>
 				</div>
-				<form className='view__box' onSubmit={ this.validateSession }>
+				<form className='view__box' onSubmit={ this.formValidate }>
 					<div className='view__header'>Enter a session ID</div>
 					<input className='JoinSession__id-input' ref={ ref => this.input = ref } />
 					<Button onTap={ this.validateSession } className='action-button'>Join</Button>

@@ -1,66 +1,53 @@
 import { observer } from 'mobx-react';
-import * as QRCode from 'qrcode.react';
 import * as React from 'react';
 
 import Button from 'shared/components/Button';
 import { Context, contextTypes } from 'shared/context';
+
+import './SessionItem.less';
 
 export type Props = {
 	sessionId: string,
 	onEnterSession(sessionId: string): void
 };
 
-type State = {
-	info: boolean
-};
-
 @observer
-class SessionItem extends React.Component<Props, State> {
+class SessionItem extends React.Component<Props> {
 	public context!: Context;
 	public static contextTypes = contextTypes;
-
-	constructor(props: Props, context: Context) {
-		super(props, context);
-
-		this.state = { info: false };
-	}
 
 	private enterSession = () => {
 		this.props.onEnterSession(this.props.sessionId);
 	}
 
-	private displayInfo = () => {
-		this.setState({ info: !this.state.info });
-	}
-
 	public render() {
 		const { sessionId } = this.props;
-		const { info } = this.state;
 		const store = this.context.store;
 		const session = store.getSession(sessionId);
 
+		const count = session.itemIds.length;
+
 		return (
-			<Button className={ 'SessionItem' + (info ? ' SessionItem_info' : '') } onTap={ this.enterSession }>
-				<div>{ session.name }</div>
-				<Button onTap={ this.displayInfo }>Info</Button>
-				{ info && (
-					<div className='SessionItem__info'>
-						<div className='user-select'>{ session.id }</div>
-						<QRCode value={ session.id } size={ 256 } />
-					</div>
-				) }
-
-				<div className='SessionItem__user-list'>
-				{
-					session.userIds.map(userId =>
-						<div className='SessionItem__user' key={ userId }>
-							{ store.getUser(userId).name }
-						</div>
-					)
-				}
+			<Button className='SessionItem' onTap={ this.enterSession }>
+				<div className='SessionItem__session-info'>
+					<div className='SessionItem__session-name'>{ session.name }</div>
+					<div className='SessionItem__item-count'>{ `${count} item${ count > 1 ? 's' : '' }` }</div>
 				</div>
-
-				<div className='SessionItem__item-count'>{ session.itemIds.length }</div>
+				<div className='SessionItem__client-list'>
+					<div className='SessionItem__client-list-label'>Connected clients:</div>
+					{ session.userIds.map(userId => {
+						const isYou = userId === store.userIdPerSessionId[sessionId];
+						return (
+							<div
+								className={ 'SessionItem__client' + (isYou ? ' SessionItem__client_you' : '') }
+								key={ userId }
+							>
+								{ store.getUser(userId).name }
+								{ isYou ? ' (you)' : null }
+							</div>
+						);
+					}) }
+				</div>
 			</Button>
 		);
 	}

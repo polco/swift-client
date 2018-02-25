@@ -19,8 +19,8 @@ class CreateSession extends React.PureComponent<TabComponentProps> {
 		const value = this.sessionNameField!.getValue();
 		if (value === '') { return; }
 
-		const sessionId = 'session-' + uuid();
 		const store = this.context.store;
+		const sessionId = 'session-' + uuid();
 		store.openSession(sessionId);
 		store.executeAction(new CreateSessionAction(
 			sessionId,
@@ -30,11 +30,16 @@ class CreateSession extends React.PureComponent<TabComponentProps> {
 		this.props.navigateToSession(sessionId);
 	}
 
+	private validate = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		this.createSession();
+	}
+
 	public render() {
 		return (
 			<div className='CreateSession'>
 				<div className='view__explanation'>Create a session to allow another device to connect.</div>
-				<form className='view__box' onSubmit={ this.createSession }>
+				<form className='view__box' onSubmit={ this.validate }>
 					<div className='view__column'>
 						<TextField
 							label='choose a name for your session'

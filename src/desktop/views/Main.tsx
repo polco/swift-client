@@ -42,7 +42,7 @@ class Main extends React.PureComponent<Props, State> {
 		super(props, context);
 
 		this.store = new Store();
-		this.state = { tabId: 'create', tabs: [[], TabsInfo], category: 1, sessionId: null };
+		this.state = { tabId: 'sessions', tabs: [[], TabsInfo], category: 1, sessionId: null };
 
 		this.sessionsObserverDispose = observe(this.store.sessionList, () => {
 			this.setState({

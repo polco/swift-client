@@ -16,6 +16,7 @@ import Session, { ISession } from 'shared/models/Session';
 import User, { IUser } from 'shared/models/User';
 
 import RTCClient from 'shared/RTCClient';
+import * as UAParser from 'ua-parser-js';
 
 const log = debug('swift:RTCClient');
 
@@ -30,7 +31,7 @@ class Store {
 	@observable public sessionList: string[] = [];
 	private docs: { [docId: string]: Doc } = {};
 	// public userId = 'user-' + uuid();
-	public userName: string = 'user buehehe';
+	@observable public userName: string;
 	private gatewayClient: GatewayClient;
 	private RTCClients: { [clientId: string]: RTCClient } = {};
 
@@ -43,6 +44,10 @@ class Store {
 
 	constructor() {
 		(window as any).store = this;
+
+		const parser = new UAParser();
+		const res = parser.getResult();
+		this.userName = res.os.name + ' - ' + res.browser.name;
 
 		this.gatewayClient = new GatewayClient();
 		this.gatewayClient.on('join', this.onJoin);
@@ -96,7 +101,7 @@ class Store {
 		const userId = 'user-' + uuid();
 		this.userIdPerSessionId[sessionId] = userId;
 		this.updating[userId] = true;
-		const user = new User(this, crdt, userId, 'user');
+		const user = new User(this, crdt, userId, this.userName);
 		this.addDoc(user);
 		delete this.updating[userId];
 
