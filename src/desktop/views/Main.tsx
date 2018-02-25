@@ -8,10 +8,11 @@ configureDevtool({
 import { Context, contextTypes } from 'shared/context';
 import Store from 'shared/Store';
 
+import SessionViewer from 'desktop/views/SessionViewer';
+
 import CreateSession from 'shared/views/CreateSession';
 import JoinSession from 'shared/views/JoinSession';
 import Sessions from 'shared/views/Sessions';
-import SessionViewer from 'shared/views/SessionViewer';
 import { TabComponentProps, TabId } from 'shared/views/tabs';
 
 import { TabsInfo } from './tabs';
@@ -62,7 +63,7 @@ class Main extends React.PureComponent<Props, State> {
 
 	public render() {
 		const { tabId, sessionId } = this.state;
-		const ContentClass = sessionId ? SessionViewer : ContentClasses[tabId];
+		const ContentClass = ContentClasses[tabId];
 
 		return (
 			<div className='Main'>
@@ -81,11 +82,15 @@ class Main extends React.PureComponent<Props, State> {
 				<div className='Main__body'>
 					<Sidebar selectSession={ this.navigateToSession } sessionId={ sessionId } />
 					<div className='Main__tab-container'>
-						<ContentClass
-							navigateToSession={ this.navigateToSession }
-							navigateToTab={ this.navigateToTab }
-							sessionId={ sessionId }
-						/>
+						{ sessionId
+							? <SessionViewer sessionId={ sessionId } />
+							: <ContentClass
+								navigateToSession={ this.navigateToSession }
+								navigateToTab={ this.navigateToTab }
+								sessionId={ sessionId }
+							/>
+						}
+
 					</div>
 				</div>
 				{ __IS_DEV__ &&  <DevTools /> }
