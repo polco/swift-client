@@ -13,7 +13,9 @@ import CreateSession from 'shared/views/CreateSession';
 import JoinSession from 'shared/views/JoinSession';
 import Sessions from 'shared/views/Sessions';
 import SessionViewer from 'shared/views/SessionViewer';
-import { TabComponentProps, TabId, TabsInfo } from 'shared/views/tabs';
+import { TabComponentProps, TabId } from 'shared/views/tabs';
+
+import { TabsInfo } from './tabs';
 
 import Tabs, { LabelProps } from 'shared/components/Tabs';
 

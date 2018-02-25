@@ -74,12 +74,12 @@ class Sessions extends React.Component<TabComponentProps> {
 					<div className='view__explanation'>Create or Join a session.</div>
 					<div className='view__box'>
 						<div className='view__column'>
-							<Button onTap={ this.create }>
+							<Button onTap={ this.create } className='action-button'>
 								Create
 							</Button>
 						</div>
 						<div className='view__column'>
-						<Button onTap={ this.join }>
+						<Button onTap={ this.join } className='action-button'>
 								Join
 							</Button>
 						</div>

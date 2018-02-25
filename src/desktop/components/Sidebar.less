@@ -1,0 +1,43 @@
+.Sidebar {
+	padding: 20px 8px 10px 7px;
+    position: relative;
+
+	&__label {
+		color: #868484;
+		margin-right: 3px;
+		white-space: nowrap;
+	}
+
+	&__user {
+		display: flex;
+    	flex-wrap: nowrap;
+
+		&-name {
+			font-weight: 600;
+		}
+	}
+
+	&__sessions {
+		margin-top: 20px;
+	}
+
+	&__session {
+		font-weight: 600;
+		font-size: 13px;
+		padding: 4px;
+
+		&_active, &:hover {
+			background-color: rgb(229, 232, 248);
+		}
+	}
+
+	&::after {
+		content: '';
+		position: absolute;
+		right: 0;
+		top: 10px;
+		bottom: 10px;
+		width: 1px;
+		background-color: #dedbdb;
+	}
+}

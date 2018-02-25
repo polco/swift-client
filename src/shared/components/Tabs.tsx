@@ -15,14 +15,17 @@ export type Props = {
 	tabs: Array<Array<{ tabId: string, Label: React.StatelessComponent<LabelProps> }>>,
 	categoryIndex: number,
 	currentTabId: string,
-	onTabSelect(tabId: string | string): void
+	onTabSelect(tabId: string | string): void,
+	hideIndicator?: boolean
 };
 
 class Tabs extends React.PureComponent<Props> {
 	private indicator: HTMLDivElement | null = null;
 	private tabsRef: { [tabId: string]: Button<TabButtonProps> | null } = {};
 	private tabWidth: { [tabId: string]: number } = {};
-	private labelUpdated = false;
+	private labelUpdated = true;
+
+	public static defaultProps: Partial<Props> = { hideIndicator: false };
 
 	public componentDidMount() {
 		this.positionIndicator();
@@ -70,7 +73,7 @@ class Tabs extends React.PureComponent<Props> {
 	}
 
 	public render() {
-		const { currentTabId, tabs, categoryIndex } = this.props;
+		const { currentTabId, tabs, categoryIndex, hideIndicator } = this.props;
 
 		return (
 			<div className='Tabs'>
@@ -97,7 +100,10 @@ class Tabs extends React.PureComponent<Props> {
 						)
 					}
 				</div>
-				<div className='Tabs__indicator' ref={ ref => this.indicator = ref } />
+				<div
+					className={ 'Tabs__indicator' + (hideIndicator ? ' Tabs__indicator_hidden' : '') }
+					ref={ ref => this.indicator = ref }
+				/>
 			</div>
 		);
 	}
