@@ -1,94 +1,56 @@
-import { observer } from 'mobx-react';
-import * as QRCode from 'qrcode.react';
 import * as React from 'react';
-import * as uuid from 'uuid/v4';
 
-import CreateDoc from 'shared/actions/CreateDoc';
 import Button from 'shared/components/Button';
-import { Context, contextTypes } from 'shared/context';
-import { IItem } from 'shared/models/Item';
-import { TabComponentProps } from 'shared/views/tabs';
+import SessionDisplay from 'shared/components/SessionDisplay';
+import SessionInfo from 'shared/components/SessionInfo';
 
 import './SessionViewer.less';
 
-@observer
-class SessionViewer extends React.Component<TabComponentProps> {
-	public context!: Context;
-	public static contextTypes = contextTypes;
-	private closingTimeout: number = -1;
-	private input!: HTMLInputElement | null;
+export type Props = {
+	sessionId: string,
+	openInfo: boolean,
+	goBack?(): void
+};
 
-	public componentWillUnmount() {
-		window.clearTimeout(this.closingTimeout);
+type State = {
+	infoOpen: boolean
+};
+
+class SessionViewer extends React.Component<Props, State> {
+	constructor(props: Props, context: any) {
+		super(props, context);
+
+		this.state = { infoOpen: props.openInfo };
 	}
 
-	public open(sessionId: string) {
-		this.setState({ sessionId });
+	public componentWillReceiveProps(nextProps: Props) {
+		if (nextProps.openInfo && !this.state.infoOpen) {
+			this.setState({ infoOpen: true });
+		}
 	}
 
-	private addText = () => {
-		const value = this.input!.value;
-		const sessionId = this.props.sessionId;
-		if (value === '' || !sessionId) { return; }
-
-		const itemId = 'item-' + uuid();
-		this.context.store.executeAction(new CreateDoc<IItem>({
-			id: itemId,
-			type: 'item',
-			creatorId: this.context.store.userIdPerSessionId[sessionId],
-			creationDate: new Date().toISOString(),
-			itemContent: { type: 'text', content: value }
-		}, sessionId));
-		this.input!.value = '';
-	}
-
-	private validateAddText = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		this.addText();
-	}
-
-	private goBack = () => {
-		this.props.navigateToTab('sessions');
+	private toggleInfo = () => {
+		this.setState({ infoOpen: !this.state.infoOpen });
 	}
 
 	public render() {
-		const store = this.context.store;
-		const { sessionId } = this.props;
-		const session = sessionId && store.getSession(sessionId) || null;
+		const sessionId = this.props.sessionId;
+		const infoOpen = this.state.infoOpen;
 
 		return (
 			<div className='SessionViewer'>
 				<div className='SessionViewer__header'>
-					<Button className='SessionViewer__name'>{ session && session.name }</Button>
-					<Button className='SessionViewer__back' onTap={ this.goBack }>Back</Button>
+					<Button onTap={ this.toggleInfo } className='SessionViewer__info'>Info</Button>
+					<Button onTap={ this.props.goBack } className='SessionViewer__go-back'>Go back</Button>
+					<div
+						className={ 'SessionViewer__slider-container' + (infoOpen ? '' : ' SessionViewer__slider-container_close') }
+					>
+						<div className='SessionViewer__slider'>
+							<SessionInfo sessionId={ sessionId } />
+						</div>
+					</div>
 				</div>
-				<div className='SessionViewer__body'>
-				{
-					session && (
-						<React.Fragment>
-							<div className='SessionViewer__info'>
-								<div className='user-select'>{ session.id }</div>
-								<QRCode value={ session.id } size={ 256 } />
-							</div>
-
-							<div className='SessionViewer__item-list'>
-							{
-								session.itemIds.map(itemId =>
-									<div className='SessionViewer__item' key={ itemId }>
-										{ store.getItem(itemId).itemContent.content }
-									</div>
-								)
-							}
-							</div>
-
-							<form className='SessionViewer__add-text' onSubmit={ this.validateAddText }>
-								<input className='SessionViewer__text-input' ref={ ref => this.input = ref } />
-								<Button onTap={ this.addText }>Send text</Button>
-							</form>
-						</React.Fragment>
-					)
-				}
-				</div>
+				<SessionDisplay sessionId={ sessionId } />
 			</div>
 		);
 	}

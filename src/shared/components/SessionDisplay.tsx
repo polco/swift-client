@@ -7,17 +7,25 @@ import Button from 'shared/components/Button';
 import { Context, contextTypes } from 'shared/context';
 import { IItem } from 'shared/models/Item';
 
-import './SessionViewer.less';
+import './SessionDisplay.less';
 
 export type Props = {
 	sessionId: string
 };
 
 @observer
-class SessionViewer extends React.Component<Props> {
+class SessionDisplay extends React.Component<Props> {
 	public context!: Context;
 	public static contextTypes = contextTypes;
 	private input!: HTMLInputElement | null;
+	private scrollDiv!: HTMLDivElement | null;
+	private isScrolledAtBottom = true;
+
+	public componentDidUpdate() {
+		if (this.isScrolledAtBottom) {
+			this.scrollDiv!.scrollTo(0, this.scrollDiv!.scrollHeight);
+		}
+	}
 
 	private addText = () => {
 		const value = this.input!.value;
@@ -40,6 +48,11 @@ class SessionViewer extends React.Component<Props> {
 		this.addText();
 	}
 
+	private onScroll = () => {
+		const { scrollHeight, scrollTop, clientHeight } = this.scrollDiv!;
+		this.isScrolledAtBottom = Math.abs(clientHeight + scrollTop - scrollHeight) < 10;
+	}
+
 	public render() {
 		const store = this.context.store;
 		const { sessionId } = this.props;
@@ -51,7 +64,7 @@ class SessionViewer extends React.Component<Props> {
 
 		let lastCreatorId: string = '';
 		let currentClientElements: JSX.Element[] = [];
-		for (let i = itemIds.length - 1; i >= 0; i -= 1) {
+		for (let i = 0; i < itemIds.length; i += 1) {
 			const itemId = itemIds[i];
 			const item = store.getItem(itemId);
 			if (item.creatorId !== lastCreatorId) {
@@ -60,33 +73,39 @@ class SessionViewer extends React.Component<Props> {
 
 				itemElements.push(
 					<div
-						key={ itemIds.length - i }
+						key={ i }
 						className={
-							'SessionViewer__client-block' +
-							(lastCreatorId === store.userIdPerSessionId[sessionId] ? ' SessionViewer__client-block_you' : '')
+							'SessionDisplay__client-block' +
+							(lastCreatorId === store.userIdPerSessionId[sessionId] ? ' SessionDisplay__client-block_you' : '')
 						}
 					>
-						<div className='SessionViewer__item-creator'>{ store.getUser(item.creatorId).name }</div>
-						<div className='SessionViewer__items'>{ currentClientElements }</div>
+						<div className='SessionDisplay__item-creator'>{ store.getUser(item.creatorId).name }</div>
+						<div className='SessionDisplay__items'>{ currentClientElements }</div>
 					</div>
 				);
 			}
 
 			currentClientElements.push(
-				<div className='SessionViewer__item' key={ itemIds.length - i }>{ item.itemContent.content }</div>
+				<div className='SessionDisplay__item' key={ i }>{ item.itemContent.content }</div>
 			);
 		}
 
 		return (
-			<div className='SessionViewer'>
-				<div className='SessionViewer__item-list'>{ itemElements }</div>
-				<form className='SessionViewer__input-area' onSubmit={ this.validateAddText }>
-					<input className='SessionViewer__text-input' ref={ ref => this.input = ref } />
-					<Button onTap={ this.addText } className='SessionViewer__add'>Add</Button>
+			<div className='SessionDisplay'>
+				<div
+					className='SessionDisplay__item-list'
+					onScroll={ this.onScroll }
+					ref={ ref => this.scrollDiv = ref }
+				>
+					{ itemElements }
+				</div>
+				<form className='SessionDisplay__input-area' onSubmit={ this.validateAddText }>
+					<input className='SessionDisplay__text-input' ref={ ref => this.input = ref } />
+					<Button onTap={ this.addText } className='SessionDisplay__add action-button'>Add</Button>
 				</form>
 			</div>
 		);
 	}
 }
 
-export default SessionViewer;
+export default SessionDisplay;

@@ -1,5 +1,6 @@
 .SessionItem {
 	display: flex;
+	flex-wrap: wrap;
 	background-color: rgb(229, 232, 247);
     padding: 10px;
 
@@ -28,5 +29,16 @@
 
 	&__item-count {
 		color: rgb(115, 115, 115);
+	}
+
+	&__id-box {
+		flex: 1 0 100%;
+		display: flex;
+		margin-top: 10px;
+		font-weight: 600;
+	}
+
+	&__id-label {
+		margin-right: 5px;
 	}
 }

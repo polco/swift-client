@@ -1,4 +1,4 @@
-.SessionViewer {
+.SessionDisplay {
 	display: flex;
 	flex-direction: column;
 	padding: 10px;
@@ -6,7 +6,10 @@
 	&__item-list {
 		flex: 1 0 0;
 		display: flex;
-    	align-items: flex-end;
+		align-items: stretch;
+		flex-direction: column;
+		justify-content: flex-end;
+		overflow-y: auto;
 	}
 
 	&__input-area {
@@ -26,22 +29,16 @@
 	}
 
 	&__add {
-		border: 1px solid #dedbdb;
 		padding: 10px;
 		margin-left: 20px;
 		font-weight: 600;
 		font-size: 14px;
-		transition: border-color 200ms linear;
-
-		&:hover, &:active {
-			border-color: black;
-		}
 	}
 
 	&__client-block {
-		flex: 1 0 0;
 		display: flex;
 		flex-direction: column;
+		margin-top: 10px;
 
 		&_you {
 			align-items: flex-end;
@@ -58,6 +55,7 @@
 		line-height: 16px;
 		display: flex;
 		flex-direction: column;
+		margin: 0 7px;
 	}
 
 	&__client-block_you &__items {
