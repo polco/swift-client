@@ -104,11 +104,13 @@ class SessionDisplay extends React.Component<Props> {
 		return (
 			<div className='SessionDisplay'>
 				<div
-					className='SessionDisplay__item-list'
+					className='SessionDisplay__scroller-container'
 					onScroll={ this.onScroll }
 					ref={ ref => this.scrollDiv = ref }
 				>
-					{ itemElements }
+					<div className='SessionDisplay__item-list'>
+						{ itemElements }
+					</div>
 				</div>
 				<form className='SessionDisplay__input-area' onSubmit={ this.validateAddText }>
 					<input className='SessionDisplay__text-input' ref={ ref => this.input = ref } />
