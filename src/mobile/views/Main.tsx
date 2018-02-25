@@ -1,5 +1,5 @@
 import { Lambda, observe } from 'mobx';
-import DevTools, { configureDevtool } from 'mobx-react-devtools';
+import { configureDevtool } from 'mobx-react-devtools';
 import * as React from 'react';
 
 configureDevtool({
@@ -117,7 +117,6 @@ class Main extends React.PureComponent<Props, State> {
 					currentTabId={ tabId === 'session' && sessionId ? sessionId : tabId }
 					onTabSelect={ this.selectTab }
 				/>
-				{ __IS_DEV__ &&  <DevTools /> }
 			</div>
 		);
 	}

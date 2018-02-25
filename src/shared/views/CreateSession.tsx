@@ -15,6 +15,10 @@ class CreateSession extends React.PureComponent<TabComponentProps> {
 	public static contextTypes = contextTypes;
 	private sessionNameField!: TextField | null;
 
+	public componentDidMount() {
+		this.sessionNameField!.focus();
+	}
+
 	private createSession = () => {
 		const value = this.sessionNameField!.getValue();
 		if (value === '') { return; }

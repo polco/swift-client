@@ -20,11 +20,16 @@ class SessionDisplay extends React.Component<Props> {
 	private input!: HTMLInputElement | null;
 	private scrollDiv!: HTMLDivElement | null;
 	private isScrolledAtBottom = true;
+	private focusTimeout: number = -1;
 
 	public componentDidUpdate() {
 		if (this.isScrolledAtBottom) {
 			this.scrollDiv!.scrollTo(0, this.scrollDiv!.scrollHeight);
 		}
+	}
+
+	public componentWillUnmount() {
+		window.clearTimeout(this.focusTimeout);
 	}
 
 	private addText = () => {
@@ -41,6 +46,12 @@ class SessionDisplay extends React.Component<Props> {
 			itemContent: { type: 'text', content: value }
 		}, sessionId));
 		this.input!.value = '';
+
+		this.focusTimeout = window.setTimeout(this.focusInput, 0);
+	}
+
+	private focusInput = () => {
+		this.input!.focus();
 	}
 
 	private validateAddText = (e: React.FormEvent<HTMLFormElement>) => {

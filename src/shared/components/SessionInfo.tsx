@@ -3,6 +3,8 @@ import * as QRCode from 'qrcode.react';
 import * as React from 'react';
 import { Context, contextTypes } from 'shared/context';
 
+import SelectableText from 'shared/components/SelectableText';
+
 import './SessionInfo.less';
 
 export type Props = {
@@ -31,7 +33,7 @@ class SessionInfo extends React.Component<Props> {
 					</div>
 					<div className='SessionInfo__box'>
 						<div className='SessionInfo__label'>Id:</div>
-						<div className='SessionInfo__creator'>{ session.id }</div>
+						<SelectableText className='SessionInfo__id' text={ session.id } />
 					</div>
 				</div>
 				<div className='SessionInfo__QR'>

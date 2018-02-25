@@ -106,8 +106,13 @@ class RTCClient extends ICustomEmitter {
 
 	private setupDataChannel() {
 		this.sendChannel!.onmessage = (event) => {
-			const { type, data } = JSON.parse(event.data);
-			this.emit(type, data);
+			try {
+				const { type, data } = JSON.parse(event.data);
+				this.emit(type, data);
+			} catch (e) {
+				log(e);
+				console.error(e); // tslint:disable-line:no-console
+			}
 		};
 		this.gatewayClient.removeListener('data', this.onGatewayMessage);
 		this.emit('connect', this.sendChannel!);
