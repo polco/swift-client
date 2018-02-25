@@ -1,0 +1,66 @@
+.SessionViewer {
+	display: flex;
+	flex-direction: column;
+	padding: 10px;
+
+	&__item-list {
+		flex: 1 0 0;
+		display: flex;
+    	align-items: flex-end;
+	}
+
+	&__input-area {
+		display: flex;
+		padding: 20px 0 10px 0;
+	}
+
+	&__text-input {
+		flex: 1 0 0;
+		transition: border-color 200ms linear;
+		border-bottom: 1px solid #dedbdb;
+		font-size: 17px;
+
+		&:hover, &:focus {
+			border-color: black;
+		}
+	}
+
+	&__add {
+		border: 1px solid #dedbdb;
+		padding: 10px;
+		margin-left: 20px;
+		font-weight: 600;
+		font-size: 14px;
+		transition: border-color 200ms linear;
+
+		&:hover, &:active {
+			border-color: black;
+		}
+	}
+
+	&__client-block {
+		flex: 1 0 0;
+		display: flex;
+		flex-direction: column;
+
+		&_you {
+			align-items: flex-end;
+		}
+	}
+
+	&__item-creator {
+		margin-bottom: 5px;
+		color: grey;
+	}
+
+	&__items {
+		font-size: 15px;
+		line-height: 16px;
+		display: flex;
+		flex-direction: column;
+	}
+
+	&__client-block_you &__items {
+		align-items: flex-end;
+	}
+}
