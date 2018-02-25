@@ -14,8 +14,17 @@ class CreateSession extends React.PureComponent<TabComponentProps> {
 	public context!: Context;
 	public static contextTypes = contextTypes;
 	private sessionNameField!: TextField | null;
+	private focusFieldTimeout: number = -1;
 
 	public componentDidMount() {
+		this.focusFieldTimeout = window.setTimeout(this.focusField, 0);
+	}
+
+	public componentWillUnmount() {
+		window.clearTimeout(this.focusFieldTimeout);
+	}
+
+	private focusField = () => {
 		this.sessionNameField!.focus();
 	}
 
