@@ -47,6 +47,7 @@ class TextField extends React.PureComponent<Props> {
 	}
 
 	public blur() { this.input!.blur(); }
+	public focus() { this.input!.focus(); }
 
 	public render() {
 		const { label, placeholder } = this.props;
