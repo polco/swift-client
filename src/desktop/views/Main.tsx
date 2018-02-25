@@ -8,11 +8,10 @@ configureDevtool({
 import { Context, contextTypes } from 'shared/context';
 import Store from 'shared/Store';
 
-import SessionViewer from 'desktop/views/SessionViewer';
-
 import CreateSession from 'shared/views/CreateSession';
 import JoinSession from 'shared/views/JoinSession';
 import Sessions from 'shared/views/Sessions';
+import SessionViewer from 'shared/views/SessionViewer';
 import { TabComponentProps, TabId } from 'shared/views/tabs';
 
 import { TabsInfo } from './tabs';
@@ -37,6 +36,7 @@ const ContentClasses: {[tabId in TabId]: React.ComponentClass<TabComponentProps>
 class Main extends React.PureComponent<Props, State> {
 	private store: Store;
 	public static childContextTypes = contextTypes;
+	private isNewSession = false;
 
 	constructor(props: Props, context: any) {
 		super(props, context);
@@ -53,8 +53,11 @@ class Main extends React.PureComponent<Props, State> {
 		this.setState({ tabId, sessionId: null });
 	}
 
-	private navigateToSession = (sessionId: string) => {
-		this.setState({ tabId: 'sessions', sessionId });
+	private navigateToSession = (sessionId: string, isNew?: boolean) => {
+		this.isNewSession = !!isNew;
+		this.setState({ tabId: 'sessions', sessionId }, () => {
+			this.isNewSession = false;
+		});
 	}
 
 	private navigateToTab = (tabId: TabId) => {
@@ -83,7 +86,7 @@ class Main extends React.PureComponent<Props, State> {
 					<Sidebar selectSession={ this.navigateToSession } sessionId={ sessionId } />
 					<div className='Main__tab-container'>
 						{ sessionId
-							? <SessionViewer sessionId={ sessionId } />
+							? <SessionViewer sessionId={ sessionId } openInfo={ this.isNewSession } />
 							: <ContentClass
 								navigateToSession={ this.navigateToSession }
 								navigateToTab={ this.navigateToTab }

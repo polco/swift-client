@@ -2,6 +2,7 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import Button from 'shared/components/Button';
+import SelectableText from 'shared/components/SelectableText';
 import { Context, contextTypes } from 'shared/context';
 
 import './SessionItem.less';
@@ -47,6 +48,10 @@ class SessionItem extends React.Component<Props> {
 							</div>
 						);
 					}) }
+				</div>
+				<div className='SessionItem__id-box'>
+					<div className='SessionItem__id-label'>Id:</div>
+					<SelectableText className='SessionItem__id' text={ sessionId } />
 				</div>
 			</Button>
 		);

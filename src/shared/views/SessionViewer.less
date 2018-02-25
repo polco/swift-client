@@ -3,11 +3,65 @@
 	flex-direction: column;
 
 	&__header {
+		position: relative;
+		padding-bottom: 5px;
+		border-bottom: 1px solid #dedbdb;
 		display: flex;
-		justify-content: space-between;
+    	justify-content: space-between;
 	}
 
-	&__body {
+	&__info, &__go-back {
+		color: #828282;
+		font-weight: 600;
+		transition: color 200ms linear;
+	}
+
+	&__slider-container {
+		position: absolute;
+		width: 100%;
+		left: 0;
+		top: 100%;
+		overflow: hidden;
+		transform: translateY(1px);
+		padding: 0 5px 5px 5px;
+
+		&_close {
+			pointer-events: none;
+			transition: opacity 1ms linear 400ms;
+			opacity: 0;
+		}
+	}
+
+	&__slider {
+		transition: transform 400ms ease-out;
+		transform: translate3d(0, 0, 0);
+		background-color: white;
+		padding: 10px;
+		box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+	}
+
+	&__slider-container_close &__slider {
+		transform: translate3d(0, -100%, 0);
+	}
+
+	.SessionDisplay {
 		flex: 1 0 0;
 	}
+}
+
+.desktop .SessionViewer__info:hover, .mobile .SessionViewer__info:active,
+.desktop .SessionViewer__go-back:hover, .mobile .SessionViewer__go-back:active {
+	color: black;
+}
+
+.desktop .SessionViewer__go-back {
+	display: none; // not my favourite thing to do -_-
+}
+
+.desktop .SessionViewer__info {
+	font-size: 13px;
+}
+
+.mobile .SessionViewer__info, .mobile .SessionViewer__go-back {
+	font-size: 16px;
 }

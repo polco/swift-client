@@ -1,0 +1,23 @@
+.SessionInfo {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+
+	&__box {
+		display: flex;
+		font-size: 14px;
+
+		&:last-child {
+			margin-bottom: 20px;
+		}
+	}
+
+	&__label {
+		margin-right: 5px;
+		color: grey;
+	}
+}
+
+.SessionInfo__box + .SessionInfo__box {
+	margin-top: 5px;
+}

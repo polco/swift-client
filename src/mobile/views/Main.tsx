@@ -39,6 +39,7 @@ class Main extends React.PureComponent<Props, State> {
 	private store: Store;
 	private sessionsObserverDispose: Lambda;
 	public static childContextTypes = contextTypes;
+	private isNewSession = false;
 
 	constructor(props: Props, context: any) {
 		super(props, context);
@@ -75,12 +76,19 @@ class Main extends React.PureComponent<Props, State> {
 		}
 	}
 
-	private navigateToSession = (sessionId: string) => {
-		this.setState({ tabId: 'session', sessionId, category: 0 });
+	private navigateToSession = (sessionId: string, isNew: boolean) => {
+		this.isNewSession = !!isNew;
+		this.setState({ tabId: 'session', sessionId, category: 0 }, () => {
+			this.isNewSession = false;
+		});
 	}
 
 	private navigateToTab = (tabId: TabId) => {
 		this.setState({ tabId, category: 1 });
+	}
+
+	private openSessions = () => {
+		this.navigateToTab('sessions');
 	}
 
 	public render() {
@@ -90,11 +98,18 @@ class Main extends React.PureComponent<Props, State> {
 		return (
 			<div className='Main'>
 				<div className='Main__tab-container'>
-					<ContentClass
-						navigateToSession={ this.navigateToSession }
-						navigateToTab={ this.navigateToTab }
-						sessionId={ sessionId }
-					/>
+					{ tabId === 'session'
+						? <SessionViewer
+							sessionId={ sessionId as string }
+							openInfo={ this.isNewSession }
+							goBack={ this.openSessions }
+						/>
+						: <ContentClass
+							navigateToSession={ this.navigateToSession }
+							navigateToTab={ this.navigateToTab }
+							sessionId={ sessionId }
+						/>
+					}
 				</div>
 				<Tabs
 					tabs={ tabs }

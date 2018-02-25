@@ -27,7 +27,7 @@ class CreateSession extends React.PureComponent<TabComponentProps> {
 			value,
 			store.userIdPerSessionId[sessionId]
 		));
-		this.props.navigateToSession(sessionId);
+		this.props.navigateToSession(sessionId, true);
 	}
 
 	private validate = (e: React.FormEvent<HTMLFormElement>) => {
