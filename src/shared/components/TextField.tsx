@@ -41,6 +41,10 @@ class TextField extends React.PureComponent<Props> {
 
 	public getValue() { return this.content; }
 
+	public setValue(value: string) { return this.input!.value = value; }
+
+	public blur() { this.input!.blur(); }
+
 	public render() {
 		const { label, placeholder } = this.props;
 
