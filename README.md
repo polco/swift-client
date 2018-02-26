@@ -37,6 +37,12 @@ The project uses Circle CI to run automated tests (only Typescript and Less lint
 The signaling server is a simple Node.js Heroku app. The clients are hosted by Github pages.
 
 
+## Platform support
+
+- desktop: I tested and it works on Chrome, Safari and Firefox in their latest versions. It should work on Edge too.
+- mobile: Chrome for Android is working fine. It works on Mobile Safari (you need to have at least iOS 11 to have WebRTC support) but the QR code scanner didn't seem to start. And since I don't own an iPhone it is not easy to debug it :)
+
+
 ## Next
 
 This idea is to provide a shared environnement between devices. I only implemented a quick chat functionality to allow transfering text. The next steps are:
