@@ -20,6 +20,7 @@ class UpdateDoc extends Action {
 		for (const key in this.changes) {
 			(doc as any)[key] = (this.changes as any)[key];
 		}
+		doc.changes = {};
 
 		this.store.applyPendingSeqAction();
 

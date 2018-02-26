@@ -55,7 +55,7 @@ declare module 'crdt' {
 		public createSet(key: string, value: string): Set;
 		public createSet(filter: (row: Row<R>) => boolean): Set;
 		public createSeq<R extends any, T extends keyof R>(key: T, value: R[T]): Seq<R>;
-		public createSeq(filter: (row: Row<R>) => boolean): Seq;
+		public createSeq(filter: (row: R) => boolean): Seq;
 
 		public on(event: 'update', cb: (update: any, source: any) => void): void;
 		public on(event: 'create' | 'row_update', cb: (row: Row<R>) => void): void;

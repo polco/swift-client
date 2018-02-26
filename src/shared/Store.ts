@@ -17,6 +17,7 @@ import User, { IUser } from 'shared/models/User';
 
 import RTCClient from 'shared/RTCClient';
 import * as UAParser from 'ua-parser-js';
+import SetUserConnected from './actions/SetUserConnected';
 
 const log = debug('swift:RTCClient');
 
@@ -41,6 +42,7 @@ class Store {
 	public pendingSeqActions: Array<() => void> = [];
 
 	public userIdPerSessionId: {[sessionId: string]: string} = {};
+	public userIdsPerClientId: {[clientId: string]: string[]} = {};
 
 	constructor() {
 		(window as any).store = this;
@@ -69,8 +71,10 @@ class Store {
 		this.docs[doc.id] = doc;
 	}
 
-	private onJoin = (sessionId: string, clientId: string) => {
+	private onJoin = (sessionId: string, clientId: string, userId: string) => {
 		if (!this.crdts[sessionId]) { this.createCRDT(sessionId); }
+		if (!this.userIdsPerClientId[clientId]) { this.userIdsPerClientId[clientId] = []; }
+		this.userIdsPerClientId[clientId].push(userId);
 
 		if (this.RTCClients[clientId]) { return; } // TODO Handle same user with many sessions
 		const client = this.RTCClients[clientId] = new RTCClient(clientId, this.gatewayClient);
@@ -89,19 +93,20 @@ class Store {
 		this.setupClient(client);
 		client.initiateConnection();
 		client.on('connect', (dc) => {
+			this.executeAction(new SetUserConnected(this.userIdPerSessionId[sessionId], true));
 			const stream = dcstream(dc);
 			stream.pipe(this.crdts[sessionId].createStream()).pipe(stream);
 		});
 	}
 
-	public createCRDT(sessionId: string) {
+	public createCRDT(sessionId: string, owner = false) {
 		const crdt = this.crdts[sessionId] = new CRDTDoc();
 
 		// TODO: how do we deal with the same user in different CRDTDOC ?
 		const userId = 'user-' + uuid();
 		this.userIdPerSessionId[sessionId] = userId;
 		this.updating[userId] = true;
-		const user = new User(this, crdt, userId, this.userName);
+		const user = new User(this, crdt, userId, this.userName, owner);
 		this.addDoc(user);
 		delete this.updating[userId];
 
@@ -121,6 +126,14 @@ class Store {
 	}
 
 	private setupClient(client: RTCClient) {
+		client.on('disconnected', () => {
+			const clientId = client.remoteClientId;
+			const userIds = this.userIdsPerClientId[clientId] || [];
+			userIds.forEach(userId => {
+				this.executeAction(new SetUserConnected(userId, false));
+			});
+		});
+
 		// client.on('get-docs', (docIds: string[]) => {
 			// client.sendMessage('docs', docIds.map(docId => this.docs[docId].toModel()));
 		// });
@@ -143,7 +156,7 @@ class Store {
 	}
 
 	public openSession(sessionId: string) {
-		this.createCRDT(sessionId);
+		this.createCRDT(sessionId, true);
 		this.gatewayClient.openSession(sessionId);
 	}
 
@@ -153,7 +166,7 @@ class Store {
 
 	public join(sessionId: string) {
 		this.createCRDT(sessionId);
-		this.gatewayClient.joinSession(sessionId);
+		this.gatewayClient.joinSession(sessionId, this.userIdPerSessionId[sessionId]);
 		return new Promise((resolve) => {
 			// TODO handle error and reject ?
 			const dispose = observe(this.sessionList, () => {
