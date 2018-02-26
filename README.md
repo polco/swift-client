@@ -5,7 +5,7 @@ Live demo: https://polco.github.io/swift-client/
 ## What is this project about ?
 I often end up in a situation when I have a piece of information (usually a link) and I want to open it on another screen in front of me which is not mine. So I can only hope that the screen is connected to a device where someone I know is logged in to any kind of social platform (which i'm part of).
 
-So this project solves that problem by letting you just open a webpage on both device and scan a QR code / enter a session ID to start sharing data among devices.
+So this project solves that problem by letting you just open a webpage on both devices and scan a QR code / enter a session ID to start sharing data among devices.
 
 
 ## Technologies / Libraries
@@ -26,7 +26,7 @@ There is a desktop and a mobile version, which share many components.
 
 - **Languages**:
 
-The code is written using **Typescript** in the strictest mode. The style is written iwth **Less**.
+The code is written using **Typescript** in the strictest mode. The style is written with **Less**.
 
 - **Continuous Integration & auto deployment**:
 
