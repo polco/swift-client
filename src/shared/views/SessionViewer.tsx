@@ -48,7 +48,7 @@ class SessionViewer extends React.Component<Props, State> {
 			<div className='SessionViewer'>
 				<div className='SessionViewer__header'>
 					<Button onTap={ this.toggleInfo } className='SessionViewer__info'>Info</Button>
-					<div className='SessionViewer__user-count'>Users: { session.userIds.length }</div>
+					<div className='SessionViewer__user-count'>Users: { session.onlineUserIds.length }</div>
 					<Button onTap={ this.props.goBack } className='SessionViewer__go-back'>Go back</Button>
 					<div
 						className={ 'SessionViewer__slider-container' + (infoOpen ? '' : ' SessionViewer__slider-container_close') }

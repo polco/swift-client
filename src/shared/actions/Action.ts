@@ -2,7 +2,7 @@ import { action } from 'mobx';
 import Store from 'shared/Store';
 
 export type ActionsType =
-	'createSession' | 'updateSessionName' | 'updateDoc' |
+	'createSession' | 'updateSessionName' | 'updateDoc' | 'setUserConnected' |
 	'updateUserName' | 'addSession' | 'createDoc' | 'addItem' | 'removeItem';
 
 abstract class IAction {

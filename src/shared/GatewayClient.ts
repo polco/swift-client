@@ -21,8 +21,8 @@ class GatewayClient extends EventEmitter {
 			log(`Disconnected from the gateway`);
 			this.emit('disconnected');
 		});
-		this.socket.on('join', (sessionId: string, clientId: string) => {
-			this.emit('join', sessionId, clientId);
+		this.socket.on('join', (sessionId: string, clientId: string, userId: string) => {
+			this.emit('join', sessionId, clientId, userId);
 		});
 		this.socket.on('sessionClient', (sessionId: string, clientId: string) => {
 			this.emit('sessionClient', sessionId, clientId);
@@ -59,9 +59,9 @@ class GatewayClient extends EventEmitter {
 		this.disconnect();
 	}
 
-	public async joinSession(sessionId: string) {
+	public async joinSession(sessionId: string, userId: string) {
 		if (!this.socket.connected) { await this.connect(); }
-		this.socket.emit('join', sessionId);
+		this.socket.emit('join', sessionId, userId);
 	}
 
 	private disconnect() {

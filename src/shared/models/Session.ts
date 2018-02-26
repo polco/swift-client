@@ -1,5 +1,5 @@
 import { Doc as CRDTDoc } from 'crdt';
-import { observable } from 'mobx';
+import { computed, observable } from 'mobx';
 import Doc, { IDoc, linked } from './Doc';
 
 import createSeq from './createSeq';
@@ -15,6 +15,9 @@ class Session extends Doc<ISession> {
 	@linked public readonly ownerId: string;
 	@linked public name: string;
 	@observable public userIds: string[];
+	@computed get onlineUserIds() {
+		return this.userIds.filter(userId => this.store.getUser(userId).connected);
+	}
 	@observable public itemIds: string[];
 
 	constructor(store: Store, crdt: CRDTDoc<IDoc>, id: string, name: string, ownerId: string) {

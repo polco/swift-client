@@ -14,6 +14,8 @@ type Message =
 
 export type RTCEvent = {
 	'connect': RTCDataChannel,
+	'connected': null,
+	'disconnected': null,
 	'get-docs': string[],
 	'docs': any[],
 	'doc-changes': { sessionId: string, changes: {[docId: string]: DocChange[]} },
@@ -35,7 +37,7 @@ class RTCClient extends ICustomEmitter {
 	private pc: RTCPeerConnection;
 	private gatewayClient: GatewayClient;
 	private sendChannel: RTCDataChannel | null = null;
-	private remoteClientId: string;
+	public remoteClientId: string;
 	public sessionCreating = false;
 	public sessionCreated = false;
 
@@ -51,6 +53,13 @@ class RTCClient extends ICustomEmitter {
 		});
 		this.pc.onicecandidate = this.onLocalIceCandidate;
 		this.pc.ondatachannel = this.onDataChannel;
+		this.pc.oniceconnectionstatechange = (e) => {
+			if (this.pc.iceConnectionState === 'connected') {
+				this.emit('connected', null);
+			} else if (this.pc.iceConnectionState === 'disconnected' || this.pc.iceConnectionState === 'failed') {
+				this.emit('disconnected', null);
+			}
+		};
 	}
 
 	public async initiateConnection() {
