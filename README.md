@@ -26,7 +26,7 @@ There is a desktop and a mobile version, which share many components.
 
 - **Languages**:
 
-The code is written using **Typescript** in the strictest mode. The style is written with **Less**.
+The code is written using **Typescript** in the strictest mode. The style is written with **Less** and follow the BEM methodology (https://en.bem.info/methodology/).
 
 - **Continuous Integration & auto deployment**:
 
