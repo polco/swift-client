@@ -43,6 +43,11 @@ The signaling server is a simple Node.js Heroku app. The clients are hosted by G
 - mobile: Chrome for Android is working fine. It works on Mobile Safari (you need to have at least iOS 11 to have WebRTC support) but the QR code scanner didn't seem to start. And since I don't own an iPhone it is not easy to debug it :)
 
 
+## Collaboration
+
+The app supports many clients connected to a same session. It still does not supports the same clients having different sessions together.
+
+
 ## Next
 
 This idea is to provide a shared environnement between devices. I only implemented a quick chat functionality to allow transfering text. The next steps are:
