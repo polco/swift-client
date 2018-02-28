@@ -7,21 +7,22 @@ import { Doc as CrdtDoc, Row as CrdtDow } from 'crdt';
 export type DocType = 'session' | 'user' | 'item';
 
 export function linked(docPrototype: any, property: string) {
-	const atom = new Atom(property);
 
-	const getter = function(this: Doc) {
-		atom.reportObserved();
-		return (this as any).__data[property];
+	const getter = function(this: any) {
+		if (!this.__atoms[property]) { this.__atoms[property] = new Atom(property); }
+		this.__atoms[property].reportObserved();
+		return this.__data[property];
 	};
 
-	const setter = function(this: Doc, val: any) {
-		const value = (this as any).__data[property];
+	const setter = function(this: any, val: any) {
+		const value = this.__data[property];
 		if (value === val) { return; }
-		(this as any).__data[property] = val;
+		this.__data[property] = val;
 		if (this.row && this.row.get(property) !== val) {
 			this.row.set(property, val);
 		}
-		atom.reportChanged();
+		if (!this.__atoms[property]) { this.__atoms[property] = new Atom(property); }
+		(this.__atoms[property] as Atom).reportChanged();
 	};
 
 	if (delete docPrototype[property]) {
@@ -39,6 +40,7 @@ export interface IDoc {
 
 abstract class Doc<M extends IDoc = any> {
 	protected __data = {};
+	protected __atoms: {[p: string]: Atom} = {};
 	@linked public readonly id: string;
 	@linked public readonly type: DocType;
 	public row!: CrdtDow<M>;
